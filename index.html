@@ -96,8 +96,8 @@ body.ready .reveal{animation:rise .8s var(--ease) forwards;animation-delay:var(-
 @keyframes peek{0%,100%{transform:translateY(0)}50%{transform:translateY(5px) rotate(2deg)}}
 .today{z-index:1}
 .today h1{font:700 30px/1.1 'Fredoka',sans-serif;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.date-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px}
-.sub{font-size:14px;font-weight:800;color:var(--ink2)}
+.date-row{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:38px;margin-top:6px}
+.sub{font-size:14px;line-height:1.2;font-weight:800;color:var(--ink2)}
 .arrows{display:flex;gap:8px}
 .arrow{width:38px;height:38px;border-radius:12px;display:grid;place-items:center}
 .arrow svg.i{width:17px;height:17px}
@@ -112,16 +112,17 @@ body.ready .reveal{animation:rise .8s var(--ease) forwards;animation-delay:var(-
 .day.has::after{content:'';position:absolute;bottom:6px;width:5px;height:5px;border-radius:50%;background:var(--rose)}
 .day.sel.has::after{background:var(--ink)}
 .day:disabled{opacity:.3}
-.tummy-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding-top:14px;border-top:2px dashed var(--rose-t)}
+.tummy-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-top:16px;padding-top:14px;border-top:2px dashed var(--rose-t)}
 .tm-l{font-size:12px;font-weight:800;color:var(--ink2)}
 .tummy{display:flex;gap:3px;margin-top:4px}
 .tummy svg{width:22px;height:22px;fill:#fff;stroke:var(--ink);stroke-width:1.7;overflow:visible}
 .tummy svg.f{fill:var(--rose)}
 .tummy svg.pop{animation:heartPop .7s var(--spring)}
 @keyframes heartPop{0%{transform:scale(.2)}55%{transform:scale(1.4)}}
-.count{text-align:right}
-.count b{display:block;font:700 30px/1 'Fredoka',sans-serif}
-.count span{font-size:12px;font-weight:800;color:var(--ink2)}
+/* sits on the hearts' line, right edge shared with the week arrows above */
+.count{display:flex;align-items:baseline;gap:5px;height:22px;margin-top:4px}
+.count b{font:700 24px/22px 'Fredoka',sans-serif}
+.count span{font-size:13px;font-weight:800;color:var(--ink2)}
 .streak{margin-top:10px;font-size:12px;font-weight:800;color:var(--ink2)}
 
 /* board: JS deals cards into columns left→right so time order reads like a row */
