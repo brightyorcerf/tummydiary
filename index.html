@@ -8,7 +8,7 @@
 <title>Tummy Diary</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&family=Pixelify+Sans:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&family=Pixelify+Sans:wght@500&display=swap" rel="stylesheet">
 <style>
 :root{
   --cream:#FFF6EC; --dot:#F6DCCB; --blush:#F9CBD3; --blush-l:#FDE6EA; --blush-d:#F3AFBD;
@@ -160,7 +160,7 @@ textarea::placeholder{color:#C8A9A4}
 .tile{display:grid;place-items:center;aspect-ratio:var(--ar);background:var(--bg) radial-gradient(rgba(255,255,255,.65) 2px,transparent 2px) 0 0/16px 16px}
 .tile span{font-size:clamp(40px,8vw,60px);filter:drop-shadow(0 4px 0 rgba(91,58,58,.12));transition:transform .45s var(--spring)}
 .cap{display:grid;gap:6px;padding:9px 3px 12px}
-.cap b{font:700 23px/1.05 'Caveat',cursive;overflow-wrap:anywhere}
+.cap b{font:600 17px/1.2 'Fredoka',sans-serif;overflow-wrap:anywhere}
 .meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 8px;white-space:nowrap;font-size:12px;font-weight:800;color:var(--ink2)}
 .tape{position:absolute;z-index:2;top:-12px;left:50%;width:78px;height:23px;transform:translateX(-50%) rotate(var(--tr));opacity:.93;
   clip-path:polygon(0 0,100% 0,97% 25%,100% 50%,97% 75%,100% 100%,0 100%,3% 75%,0 50%,3% 25%)}
@@ -356,7 +356,7 @@ dialog .bar{position:sticky;top:0;z-index:3}
   .plate-h h2{font-size:26px}
   .card{border-radius:8px;box-shadow:2px 3px 0 var(--blush-d)}
   .cap{padding:7px 2px 9px;gap:5px}
-  .cap b{font-size:20px}
+  .cap b{font-size:15px}
   .meta{font-size:11px}
   .chip{font-size:11px;padding:2px 7px}
   .tape{width:62px;height:19px;top:-10px}
@@ -1180,7 +1180,7 @@ async function postcard() {
       g.textBaseline = 'alphabetic';
     }
     g.restore();
-    g.fillStyle = ink; g.font = `700 ${pw * .12}px Caveat`;
+    g.fillStyle = ink; g.font = `600 ${pw * .085}px Fredoka`;
     let name = it.name;
     while (g.measureText(name).width > pW && name.length > 3) name = name.slice(0, -2);
     g.fillText(name === it.name ? name : name + '…', 0, ph / 2 - pw * .07);
