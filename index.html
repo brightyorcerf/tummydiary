@@ -1,0 +1,1108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#FFF6EC">
+<meta name="color-scheme" content="only light">
+<title>Tummy Diary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&family=Pixelify+Sans:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FFF6EC; --dot:#F6DCCB; --blush:#F9CBD3; --blush-l:#FDE6EA; --blush-d:#F3AFBD;
+  --pink:#F07C98; --pink-d:#D9587A; --blue:#CFE8F7; --blue-d:#8EC5E8; --butter:#FFE9A8;
+  --lav:#E7DCF7; --peach:#FFDCC7; --ink:#5B3A3A; --ink2:#9A7470;
+  --spring:cubic-bezier(.34,1.56,.64,1); --ease:cubic-bezier(.2,.9,.3,1);
+  --bw:2.5px; --gap:22px; --cp:10px; --pw:124px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+/* registered so it can animate and inherit into the mascots' <use> trees (blinking / sleeping eyes) */
+@property --open{syntax:'<number>';inherits:true;initial-value:1}
+@property --munch{syntax:'<number>';inherits:true;initial-value:0}
+@property --puff{syntax:'<number>';inherits:true;initial-value:0}
+
+*{box-sizing:border-box;margin:0}
+html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%}
+body{font-family:'Nunito',system-ui,sans-serif;color:var(--ink);background:var(--cream);
+  background-image:radial-gradient(var(--dot) 1.3px,transparent 1.3px);background-size:22px 22px;min-height:100dvh;overflow-x:hidden;overflow-x:clip}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+button:disabled{cursor:default}
+img{-webkit-touch-callout:none}
+:focus-visible{outline:3px solid var(--blue-d);outline-offset:3px}
+[hidden]{display:none!important}
+
+/* sky */
+.sky{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.cloud{position:absolute;left:0;top:var(--t);width:var(--w);animation:drift var(--d) linear infinite;animation-delay:var(--dl)}
+@keyframes drift{from{transform:translateX(-30vw)}to{transform:translateX(110vw)}}
+.tw{position:absolute;color:var(--pink);opacity:.45;font-size:var(--s,16px);animation:tw 3.2s ease-in-out infinite;animation-delay:var(--dl,0s)}
+@keyframes tw{50%{transform:scale(.6) rotate(25deg);opacity:.15}}
+@keyframes bob{50%{transform:translateY(-6px) rotate(-2deg)}}
+.blink{animation:blink 5s infinite}
+@keyframes blink{0%,93%,100%{--open:1}96%{--open:0}}
+
+/* loader */
+.loader{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:inherit;transition:opacity .55s ease,visibility .55s}
+.loader.done{opacity:0;visibility:hidden}
+.loader .win{width:min(300px,calc(100vw - 48px));transition:transform .55s var(--spring)}
+.loader.done .win{transform:scale(.9) translateY(-14px)}
+.lb{padding:26px 24px 24px;display:grid;justify-items:center;gap:14px}
+.lb svg{width:96px;animation:hop .7s ease-in-out infinite alternate,blink 5s infinite}
+@keyframes hop{to{transform:translateY(-10px) rotate(3deg)}}
+.lb p{font-weight:800;font-size:14px}
+.prog{width:100%;height:18px;border:var(--bw) solid var(--ink);border-radius:999px;overflow:hidden;background:#fff}
+.prog span{display:block;height:100%;width:0;background:repeating-linear-gradient(45deg,var(--pink) 0 10px,var(--blush) 10px 20px);background-size:28.28px 100%;animation:load 1.15s cubic-bezier(.6,0,.3,1) forwards,stripes .6s linear infinite}
+@keyframes load{to{width:100%}}
+@keyframes stripes{to{background-position:28.28px 0}}
+
+/* entrance */
+.reveal{opacity:0}
+body.ready .reveal{animation:rise .8s var(--spring) forwards;animation-delay:var(--d,0s)}
+@keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+
+/* layout */
+.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 24px calc(140px + var(--safe-b))}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 0 0}
+.logo{display:flex;align-items:center;gap:12px}
+.logo button svg{display:block;width:56px;animation:bob 3.4s ease-in-out infinite,blink 5s 1.3s infinite}
+.brand{font:700 26px/1 'Fredoka',sans-serif;letter-spacing:-.3px}
+.brand small{display:block;font:700 12px 'Nunito';color:var(--ink2);margin-top:5px;letter-spacing:.2px}
+.top-r{display:flex;gap:10px}
+.pill{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 16px;border:var(--bw) solid var(--ink);border-radius:999px;background:#fff;box-shadow:3px 3px 0 var(--ink);font-weight:800;font-size:14px;transition:transform .25s var(--spring),box-shadow .25s var(--spring)}
+.pill:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.pill.pink{background:var(--blush)}
+main{display:flex;flex-direction:column;gap:28px}
+
+/* retro windows */
+.win{background:#fff;border:var(--bw) solid var(--ink);border-radius:20px;box-shadow:6px 6px 0 var(--sh,var(--blush-d));overflow:hidden;position:relative}
+.bar{display:flex;align-items:center;gap:7px;min-height:38px;padding:0 14px;background:var(--bar,var(--blush));border-bottom:var(--bw) solid var(--ink);font:500 14px 'Pixelify Sans',monospace;letter-spacing:.3px}
+.bar .t{flex:1}
+.bar i{width:12px;height:12px;border:2px solid var(--ink);border-radius:4px;background:#fff}
+.bar i:last-child{background:var(--pink)}
+.bar .x{width:36px;height:36px;margin-right:-10px;border-radius:10px;font:700 20px/1 'Nunito';display:grid;place-items:center}
+
+/* hero: cinnamoroll peeks over the window edge */
+.hero-wrap{position:relative;margin-top:calc(var(--pw) * .5)}
+.pup{position:absolute;z-index:0;right:44px;top:calc(var(--pw) * -.5);width:var(--pw);animation:peek 4s ease-in-out infinite,blink 5s infinite;transform-origin:50% 100%}
+.pup svg{display:block;width:100%}
+@keyframes peek{0%,100%{transform:translateY(0)}50%{transform:translateY(5px) rotate(2deg)}}
+.hero{z-index:1}
+.hero .hb{padding:26px 30px 30px}
+.hero h1{font:700 clamp(28px,5.2vw,48px)/1.08 'Fredoka',sans-serif;letter-spacing:-.5px;text-wrap:balance}
+/* sized to the lowercase letters and centred on them */
+.h-ico{display:inline-block;width:1.1em;height:.5em;vertical-align:.02em;fill:currentColor}
+.date-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px}
+.sub{font-weight:800;color:var(--ink2)}
+.arrows{display:flex;gap:8px;flex:none}
+.arrow{width:40px;height:40px;border-radius:50%;border:var(--bw) solid var(--ink);background:#fff;box-shadow:2px 2px 0 var(--ink);font:800 18px/1 'Nunito';display:grid;place-items:center;transition:transform .25s var(--spring)}
+.arrow:active:not(:disabled){transform:scale(.9)}
+.arrow:disabled{opacity:.3;box-shadow:none}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:22px}
+.day{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 0 9px;border-radius:16px;border:var(--bw) solid transparent;background:var(--cream);position:relative;transition:transform .3s var(--spring),background .2s}
+.day small{font-size:11px;font-weight:900;color:var(--ink2);letter-spacing:.5px}
+.day b{font:600 21px 'Fredoka',sans-serif}
+.day:active:not(:disabled){transform:scale(.93)}
+.day.today:not(.sel){border-color:var(--pink)}
+.day.sel{background:var(--pink);color:#fff;border-color:var(--ink);box-shadow:3px 3px 0 var(--ink);transform:translateY(-3px)}
+.day.sel small{color:#fff}
+.day.has::after{content:'♥';position:absolute;bottom:-11px;font-size:12px;color:var(--pink);animation:pop .4s var(--spring)}
+.day.sel.has::after{color:var(--ink)}
+.day:disabled{opacity:.35}
+
+/* mood + stats */
+.row{display:grid;grid-template-columns:1.6fr 1fr;gap:24px}
+.mood-w{--bar:var(--blue);--sh:var(--blue-d)}
+.stats-w{--bar:var(--butter);--sh:#F2D27A}
+.pad{padding:20px 22px 22px}
+.lbl{font-weight:900;font-size:14px;margin-bottom:12px}
+.moods{display:flex;gap:10px;margin-bottom:16px}
+.mood{width:52px;height:52px;flex:none;border-radius:50%;background:var(--cream);border:var(--bw) solid transparent;font-size:26px;display:grid;place-items:center;transition:transform .35s var(--spring),background .2s}
+.mood:active{transform:scale(.88)}
+.mood[aria-pressed=true]{background:var(--blush);border-color:var(--ink);box-shadow:2px 2px 0 var(--ink);transform:scale(1.08)}
+.note-wrap{position:relative}
+textarea{display:block;width:100%;min-height:86px;resize:vertical;padding:0 14px;border:var(--bw) dashed var(--blush-d);border-radius:14px;font:600 16px/28px 'Nunito';color:var(--ink);
+  background:repeating-linear-gradient(#fff 0 27px,var(--blush-l) 27px 28px);background-attachment:local;transition:border-color .2s}
+textarea:focus{outline:none;border-style:solid;border-color:var(--pink)}
+textarea::placeholder{color:#C8A9A4}
+.saved{position:absolute;right:12px;bottom:8px;font-size:12px;font-weight:900;color:var(--pink);opacity:0;transform:translateY(4px);transition:.3s;pointer-events:none}
+.saved.on{opacity:1;transform:none}
+.big{font:700 54px/1 'Fredoka',sans-serif;color:var(--pink)}
+.big-l{font-weight:900;margin:2px 0 14px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--bg,#fff);border:1.8px solid var(--ink);border-radius:999px;padding:3px 9px;font-size:12px;font-weight:900;white-space:nowrap;color:var(--ink)}
+.streak{margin-top:14px;font-size:13px;font-weight:800;color:var(--ink2)}
+
+/* scrapbook board: JS deals cards into columns left→right so time order reads like a row */
+.plate-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:12px 0 24px}
+.plate-h h2{font:700 30px 'Fredoka',sans-serif}
+.plate-h span{font-size:13px;font-weight:800;color:var(--ink2)}
+.board{display:flex;align-items:flex-start;gap:var(--gap)}
+.col{flex:1;min-width:0;display:flex;flex-direction:column;gap:calc(var(--gap) + 12px)}
+/* tilt comes from the phone gyro (--gx/--gy on .board) or, on desktop, from the mouse (inline --rx/--ry) */
+.card{--rx:calc(var(--gy,0) * -1deg);--ry:calc(var(--gx,0) * 1deg);--mx:calc(50% + var(--gx,0) * 4%);--my:calc(50% - var(--gy,0) * 4%);--hx:calc(50% + var(--gx,0) * 7%);
+  position:relative;display:block;width:100%;text-align:left;padding:var(--cp) var(--cp) 0;background:#fff;border:var(--bw) solid var(--ink);border-radius:10px;
+  box-shadow:3px 4px 0 var(--blush-d);transform:perspective(800px) rotateX(var(--rx)) rotateY(var(--ry)) rotate(var(--r));transition:transform .4s var(--spring),box-shadow .4s var(--spring)}
+.card.tilt{--holo:1;transition:transform .12s ease-out,box-shadow .3s}
+.card:active{transform:perspective(800px) rotateX(var(--rx)) rotateY(var(--ry)) rotate(var(--r)) scale(.97)}
+.pic{position:relative;display:block;border-radius:6px;overflow:hidden;isolation:isolate}
+.pic::before,.pic::after{content:'';position:absolute;z-index:1;inset:0;pointer-events:none;opacity:var(--holo,0);transition:opacity .45s}
+/* foil: repeating rainbow bands that slide with the tilt */
+.pic::before{mix-blend-mode:overlay;opacity:calc(var(--holo,0) * .7);
+  background:repeating-linear-gradient(115deg,#ff6fae 0%,#ffd166 7%,#6fffd2 14%,#7d8cff 21%,#e07dff 28%,#ff6fae 35%) var(--hx) 50%/220% 220%}
+/* glare: a soft light spot under the finger / mouse */
+.pic::after{mix-blend-mode:soft-light;background:radial-gradient(circle at var(--mx) var(--my),#fff,rgba(255,255,255,.35) 25%,rgba(255,255,255,0) 55%)}
+.card img,.tile{display:block;width:100%}
+.card img{height:auto;max-height:440px;object-fit:cover;background:var(--blush-l)}
+.tile{display:grid;place-items:center;aspect-ratio:var(--ar);background:var(--bg) radial-gradient(rgba(255,255,255,.65) 2px,transparent 2px) 0 0/16px 16px}
+.tile span{font-size:clamp(40px,8vw,60px);filter:drop-shadow(0 4px 0 rgba(91,58,58,.12));transition:transform .45s var(--spring)}
+.cap{display:grid;gap:6px;padding:9px 3px 12px}
+.cap b{font:700 23px/1.05 'Caveat',cursive;overflow-wrap:anywhere}
+.meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 8px;white-space:nowrap;font-size:12px;font-weight:800;color:var(--ink2)}
+.tape{position:absolute;z-index:2;top:-12px;left:50%;width:78px;height:23px;transform:translateX(-50%) rotate(var(--tr));opacity:.93;
+  clip-path:polygon(0 0,100% 0,97% 25%,100% 50%,97% 75%,100% 100%,0 100%,3% 75%,0 50%,3% 25%)}
+.tape.c1{left:-16px;top:4px;width:60px;transform:rotate(-38deg)}
+.tape.c2{left:auto;right:-16px;top:4px;width:60px;transform:rotate(38deg)}
+.t0{background:repeating-linear-gradient(45deg,#F7B9C6 0 6px,#FDE1E7 6px 12px)}
+.t1{background:radial-gradient(#fff 2px,transparent 2.5px) 0 0/9px 9px,#B9DCF3}
+.t2{background:linear-gradient(90deg,rgba(255,255,255,.55) 50%,transparent 0) 0 0/10px 10px,linear-gradient(rgba(255,255,255,.55) 50%,transparent 0) 0 0/10px 10px,#FFE08F}
+.t3{background:repeating-linear-gradient(90deg,#E2D4F6 0 8px,#D2C1F0 8px 10px)}
+.sticker{position:absolute;right:-12px;bottom:44px;font-size:30px;line-height:1;transform:rotate(var(--sr));pointer-events:none;
+  filter:drop-shadow(1.5px 0 0 #fff) drop-shadow(-1.5px 0 0 #fff) drop-shadow(0 1.5px 0 #fff) drop-shadow(0 -1.5px 0 #fff) drop-shadow(1px 2px 1px rgba(91,58,58,.35))}
+.in{animation:drop .7s var(--spring) both;animation-delay:calc(var(--i) * 70ms)}
+.new{animation:drop .8s var(--spring) both}
+@keyframes drop{from{opacity:0;transform:translateY(-30px) rotate(calc(var(--r) * -4)) scale(.9)}}
+@keyframes pop{from{opacity:0;transform:translateY(26px) scale(.88)}}
+
+/* empty: cinnamoroll naps */
+.empty{display:grid;justify-items:center;text-align:center;gap:6px;padding:10px 20px;animation:pop .6s var(--spring)}
+.nap{position:relative;width:170px;margin-bottom:4px}
+.nap svg{display:block;width:100%;--open:0;transform-origin:50% 100%;animation:breathe 3.2s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.03,.97)}}
+.z{position:absolute;right:22px;top:14px;font:700 20px 'Fredoka',sans-serif;color:var(--blue-d);opacity:0;animation:zz 3s ease-in infinite;animation-delay:var(--dl)}
+@keyframes zz{0%{opacity:0;transform:translate(0,0) scale(.6)}30%{opacity:1}100%{opacity:0;transform:translate(24px,-44px) scale(1.3)}}
+.empty b{font:600 22px 'Fredoka',sans-serif}
+.empty p{font-weight:700;color:var(--ink2)}
+
+/* fab */
+.fab{position:fixed;right:clamp(16px,4vw,40px);bottom:calc(clamp(16px,4vw,36px) + var(--safe-b));z-index:20;width:68px;height:68px;border-radius:50%;background:var(--pink);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);color:#fff;display:grid;place-items:center;transition:transform .35s var(--spring),box-shadow .2s}
+.fab svg{width:30px;transition:transform .45s var(--spring)}
+.fab:active{transform:translate(2px,2px) scale(.95);box-shadow:1px 1px 0 var(--ink)}
+.fab::after{content:'add a nibble';position:absolute;right:84px;white-space:nowrap;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:6px 13px;font-weight:900;font-size:13px;color:var(--ink);opacity:0;transform:translateX(8px);transition:.3s var(--spring);pointer-events:none}
+.fab.nudge{animation:nudge 2.2s ease-out infinite}
+@keyframes nudge{0%{box-shadow:4px 4px 0 var(--ink),0 0 0 0 rgba(240,124,152,.5)}70%,100%{box-shadow:4px 4px 0 var(--ink),0 0 0 18px rgba(240,124,152,0)}}
+.spark{position:fixed;z-index:60;pointer-events:none;font-size:var(--fs,18px);font-weight:900}
+
+/* kitty pops up from the bottom edge and waves */
+.peek{position:fixed;left:clamp(14px,4vw,40px);bottom:0;z-index:30;width:112px;transform:translateY(115%);transition:transform .55s var(--spring);pointer-events:none}
+.peek.on{transform:translateY(24%)}
+.peek svg{position:relative;display:block;width:100%}
+.paw{position:absolute;left:88px;top:22px;width:24px;height:30px;background:#fff;border:var(--bw) solid var(--ink);border-radius:50%;transform-origin:50% 100%}
+.peek.on .paw{animation:wave .4s ease-in-out infinite alternate}
+.peek.on svg{animation:blink 5s infinite}
+@keyframes wave{from{transform:rotate(-15deg)}to{transform:rotate(30deg)}}
+.peek .bubble{left:66%}
+.bubble{position:absolute;bottom:calc(100% - 4px);background:#fff;border:var(--bw) solid var(--ink);border-radius:16px 16px 16px 4px;padding:6px 13px;font:600 16px 'Fredoka',sans-serif;white-space:nowrap;box-shadow:2px 2px 0 var(--ink)}
+.peek.on .bubble{animation:pop .5s var(--spring) .25s both}
+
+/* feed cinnamoroll: he rises, opens wide, the food arcs into his mouth, he chews */
+.feeder{position:fixed;left:50%;bottom:0;z-index:31;width:180px;margin-left:-90px;transform:translateY(110%);transition:transform .55s var(--spring);pointer-events:none}
+.feeder.on{transform:translateY(16%)}
+.feeder svg{display:block;width:100%;transform-origin:50% 100%}
+/* whichever cinnamoroll is on screen does the eating: the napping one wakes, the peeking one stretches up */
+.feeder svg,.nap svg,.pup svg{transition:--munch .15s ease-out}
+.nap.on svg{--open:1;animation:none}
+.nap.on .z{display:none}
+.pup{transition:transform .45s var(--spring)}
+.pup.on{animation:none;transform:translateY(-26%)}
+.feeder.open svg,.nap.open svg,.pup.open svg{--munch:1}
+.feeder.chew svg,.nap.chew svg,.pup.chew svg{animation:chew .2s ease-in-out 6 alternate}
+@keyframes chew{to{transform:scale(1.07,.93);--puff:1}}
+.feeder .bubble{left:62%;opacity:0}
+.feeder.talk .bubble{opacity:1;animation:pop .45s var(--spring) both}
+.token{position:fixed;z-index:32;width:58px;height:58px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 6px 14px rgba(91,58,58,.28);pointer-events:none}
+span.token{display:grid;place-items:center;border:0;box-shadow:none;font-size:44px;line-height:1;filter:drop-shadow(0 4px 4px rgba(91,58,58,.25))}
+
+/* tummy happiness: one heart per meal type logged today */
+.tm-l{font-size:13px;font-weight:900;margin-top:16px}
+.tummy{display:flex;gap:5px;margin-top:6px}
+.tummy svg{width:24px;height:24px;fill:#fff;stroke:var(--ink2);stroke-width:1.8;stroke-dasharray:3 2.4;overflow:visible}
+.tummy svg.f{fill:var(--pink);stroke:var(--ink);stroke-dasharray:none}
+.tummy svg.pop{animation:heartPop .7s var(--spring)}
+@keyframes heartPop{0%{transform:scale(.2)}55%{transform:scale(1.4)}}
+
+/* shared-element morphs (View Transitions API) */
+::view-transition-group(pick){animation-duration:.5s;animation-timing-function:cubic-bezier(.3,1.2,.4,1)}
+::view-transition-old(pick),::view-transition-new(pick){height:100%;object-fit:cover;animation-duration:.28s}
+::view-transition-group(root){animation-duration:.3s}
+dialog.vt[open]{animation:none}
+
+/* dialogs: centred cards on desktop, swipeable bottom sheets on phones */
+dialog{margin:auto;border:0;padding:0;background:none;width:calc(100% - 32px);max-width:460px;overflow:visible;color:var(--ink)}
+dialog .win{max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain}
+dialog[open]{animation:dlg .5s var(--spring)}
+dialog.closing{animation:dlgOut .22s ease-in forwards}
+dialog::backdrop{background:rgba(91,58,58,.3);animation:fade .3s}
+dialog.closing::backdrop{animation:fade .22s reverse forwards}
+@keyframes dlg{from{opacity:0;transform:translateY(34px) scale(.93)}}
+@keyframes dlgOut{to{opacity:0;transform:translateY(20px) scale(.96)}}
+@keyframes fade{from{opacity:0}}
+dialog .bar{position:sticky;top:0;z-index:3}
+.grab{display:none}
+.form{display:grid;gap:16px;padding:20px}
+.photo{position:relative}
+.drop{position:relative;display:grid;place-items:center;align-content:center;gap:4px;min-height:150px;border:var(--bw) dashed var(--blush-d);border-radius:18px;background:var(--cream);cursor:pointer;text-align:center;font-weight:800;font-size:14px;color:var(--ink2);overflow:hidden;transition:background .2s,border-color .2s}
+.drop.over,.drop:active{background:var(--blush-l);border-color:var(--pink)}
+.drop:focus-within{outline:3px solid var(--blue-d);outline-offset:2px}
+.drop .cam{font-size:34px;transition:transform .4s var(--spring)}
+.drop input{position:absolute;opacity:0;width:1px;height:1px}
+.drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:fade .4s}
+.rm{position:absolute;top:10px;right:10px;z-index:2;min-height:34px;padding:0 12px;border-radius:999px;background:#fff;border:2px solid var(--ink);font-size:13px;font-weight:900}
+.field{border:0;padding:0;min-width:0}
+.field label,.field legend{display:block;font-weight:900;font-size:13px;margin-bottom:7px;padding:0}
+.inp{display:block;width:100%;min-height:50px;padding:0 14px;border:var(--bw) solid var(--ink);border-radius:14px;font:700 16px 'Nunito';color:var(--ink);background:#fff;transition:box-shadow .2s;-webkit-appearance:none;appearance:none}
+.inp:focus{outline:none;box-shadow:3px 3px 0 var(--pink)}
+.inp::placeholder{color:#C8A9A4}
+.meals{display:flex;flex-wrap:wrap;gap:8px}
+.meals label{display:block;margin:0}
+.meals input{position:absolute;opacity:0;pointer-events:none}
+.meals span{display:inline-flex;align-items:center;gap:5px;min-height:40px;padding:0 14px;border:2px solid var(--ink);border-radius:999px;background:#fff;font-weight:900;font-size:14px;cursor:pointer;-webkit-user-select:none;user-select:none;transition:transform .3s var(--spring),background .2s,box-shadow .2s}
+.meals input:checked+span{background:var(--bg);box-shadow:2px 2px 0 var(--ink);transform:translateY(-2px)}
+.meals input:focus-visible+span{outline:3px solid var(--blue-d);outline-offset:2px}
+.actions{display:flex;gap:10px;align-items:center;justify-content:flex-end}
+.btn{min-height:46px;padding:0 20px;border-radius:999px;border:var(--bw) solid var(--ink);background:#fff;box-shadow:3px 3px 0 var(--ink);font-weight:900;font-size:15px;transition:transform .25s var(--spring),box-shadow .25s}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.btn.primary{background:var(--pink);color:#fff}
+.btn.ghost{margin-right:auto;border-color:transparent;box-shadow:none;color:var(--pink-d);padding-inline:6px}
+
+/* calendar */
+#cal .bar{--bar:var(--blue)}
+.cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-h h3{font:700 22px 'Fredoka',sans-serif}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.wd{font-size:11px;font-weight:900;text-align:center;color:var(--ink2);padding-bottom:2px}
+.cd{aspect-ratio:1;min-width:0;border-radius:12px;background:var(--cream) center/cover;font:600 13px 'Fredoka',sans-serif;position:relative;display:grid;place-items:center;border:2px solid transparent;transition:transform .25s var(--spring)}
+.cd:active:not(:disabled){transform:scale(.9)}
+.cd em{font-style:normal;font-size:18px}
+.cd.has{border-color:var(--ink);background-color:var(--blush-l)}
+.cd.has span{position:absolute;top:2px;left:5px;font-size:10px}
+.cd.ph span{background:#fff;border-radius:6px;padding:0 4px}
+.cd.today{border-color:var(--pink)}
+.cd.sel{outline:3px solid var(--pink);outline-offset:2px}
+.cd:disabled{opacity:.3}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(28px + var(--safe-b));z-index:50;display:flex;gap:14px;align-items:center;min-height:46px;padding:0 20px;border-radius:999px;background:var(--ink);color:var(--cream);font-weight:800;box-shadow:0 12px 30px rgba(91,58,58,.25);transform:translate(-50%,calc(100% + 40px));visibility:hidden;transition:transform .5s var(--spring),visibility .5s;white-space:nowrap}
+.toast.show{transform:translate(-50%,0);visibility:visible}
+.toast button{min-height:40px;color:var(--blush);font-weight:900;text-decoration:underline}
+
+/* hover only on real pointers, so taps on android don't leave cards stuck "lifted" */
+@media (hover:hover){
+  .pill:hover{transform:translate(-1px,-2px);box-shadow:4px 5px 0 var(--ink)}
+  .day:hover:not(:disabled):not(.sel){transform:translateY(-3px);background:var(--blush-l)}
+  .arrow:hover:not(:disabled){transform:scale(1.1)}
+  .mood:hover:not([aria-pressed=true]){transform:scale(1.12) rotate(-8deg)}
+  .card:hover{transform:perspective(800px) translateY(-6px) scale(1.03) rotateX(var(--rx)) rotateY(var(--ry));box-shadow:6px 10px 0 var(--blush-d)}
+  .card:hover .tile span{transform:scale(1.15) rotate(-8deg)}
+  .fab:hover{transform:translate(-2px,-3px) scale(1.06)}
+  .fab:hover svg{transform:rotate(90deg)}
+  .fab:hover::after{opacity:1;transform:none}
+  .drop:hover{background:var(--blush-l);border-color:var(--pink)}
+  .drop:hover .cam{transform:scale(1.15) rotate(-10deg)}
+  .btn:hover{transform:translate(-1px,-2px);box-shadow:4px 5px 0 var(--ink)}
+  .btn.ghost:hover{transform:none;box-shadow:none;text-decoration:underline}
+  .cd:hover:not(:disabled){transform:scale(1.1);z-index:1}
+  .bar .x:hover{background:rgba(255,255,255,.7)}
+}
+
+@media (max-width:760px){
+  .row{display:contents}
+  .hero-wrap{order:1} #plate{order:2} .mood-w{order:3} .stats-w{order:4}
+  .hero .hb{padding:20px 18px 24px}
+}
+@media (max-width:600px){
+  :root{--bw:2px;--gap:12px;--cp:7px;--pw:96px}
+  main{gap:24px}
+  .wrap{padding:0 16px calc(120px + var(--safe-b))}
+  .top{padding-top:14px}
+  .logo{gap:8px}
+  .logo button svg{width:46px}
+  .brand{font-size:23px}
+  .brand small,.lbl-t{display:none}
+  .pill{width:44px;padding:0}
+  #todayBtn{width:auto;padding:0 14px}
+  .pup{right:24px}
+  .win{border-radius:18px;box-shadow:4px 4px 0 var(--sh,var(--blush-d))}
+  .arrow{width:36px;height:36px;font-size:16px}
+  .days{gap:4px;margin-top:18px}
+  .day{padding:8px 0 7px;border-radius:12px}
+  .day small{font-size:10px;letter-spacing:0}
+  .day b{font-size:17px}
+  .pad{padding:16px 16px 18px}
+  .moods{justify-content:space-between;gap:4px}
+  .mood{width:48px;height:48px;font-size:24px}
+  .big{font-size:46px}
+  .plate-h{margin:4px 0 20px}
+  .plate-h h2{font-size:26px}
+  .card{border-radius:8px;box-shadow:2px 3px 0 var(--blush-d)}
+  .cap{padding:7px 2px 9px;gap:5px}
+  .cap b{font-size:20px}
+  .meta{font-size:11px}
+  .chip{font-size:11px;padding:2px 7px}
+  .tape{width:62px;height:19px;top:-10px}
+  .tape.c1,.tape.c2{width:46px}
+  .sticker{font-size:24px;right:-8px;bottom:38px}
+  .fab{width:62px;height:62px}
+  .peek{width:96px}
+  .feeder{width:150px;margin-left:-75px}
+  .paw{left:74px;top:18px;width:21px;height:26px}
+  .toast{bottom:calc(96px + var(--safe-b))}
+  dialog{width:100%;max-width:none;margin:auto 0 0}
+  dialog .win{max-height:92dvh;border-radius:24px 24px 0 0;border-bottom:0;box-shadow:0 -8px 30px rgba(91,58,58,.18);padding-bottom:var(--safe-b)}
+  dialog .bar{touch-action:none;padding-top:10px;min-height:46px}
+  .grab{display:block;position:absolute;top:6px;left:50%;width:44px;height:5px;margin-left:-22px;border-radius:9px;background:var(--ink);opacity:.35}
+  dialog[open]{animation:sheetIn .45s var(--ease)}
+  dialog.closing{animation:sheetOut .25s ease-in forwards}
+  .form{padding:18px 16px 20px}
+  .actions .btn{flex:1}
+  .actions .btn.ghost{flex:none}
+}
+@keyframes sheetIn{from{transform:translateY(100%)}}
+@keyframes sheetOut{to{transform:translateY(100%)}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="kitty" viewBox="0 0 120 100">
+    <g stroke="#5B3A3A" stroke-width="3" stroke-linejoin="round" fill="#fff">
+      <path d="M22 40 L17 7 L48 25 Z"/><path d="M98 40 L103 7 L72 25 Z"/>
+      <ellipse cx="60" cy="59" rx="50" ry="37"/>
+    </g>
+    <path d="M4 56 L24 61M3 69 L24 69M5 82 L24 77M116 56 L96 61M117 69 L96 69M115 82 L96 77" stroke="#5B3A3A" stroke-width="3" stroke-linecap="round"/>
+    <g style="opacity:var(--open,1)"><ellipse cx="40" cy="61" rx="4.5" ry="6" fill="#3A2626"/><ellipse cx="80" cy="61" rx="4.5" ry="6" fill="#3A2626"/></g>
+    <path style="opacity:calc(1 - var(--open,1))" d="M35 62 q5 4 10 0M75 62 q5 4 10 0" fill="none" stroke="#3A2626" stroke-width="2.6" stroke-linecap="round"/>
+    <ellipse cx="60" cy="71" rx="5.5" ry="4" fill="#FFD166" stroke="#5B3A3A" stroke-width="2.2"/>
+    <ellipse cx="29" cy="75" rx="6" ry="3.5" fill="#FFB3C1" opacity=".75"/><ellipse cx="91" cy="75" rx="6" ry="3.5" fill="#FFB3C1" opacity=".75"/>
+    <g fill="#F07C98" stroke="#5B3A3A" stroke-width="2.6" stroke-linejoin="round">
+      <path d="M86 24 C73 4 61 14 68 29 C74 38 83 31 86 24Z"/><path d="M86 24 C99 4 113 14 106 29 C100 38 89 31 86 24Z"/>
+      <circle cx="86" cy="24" r="6.5"/>
+    </g>
+  </symbol>
+  <symbol id="pup" viewBox="0 0 200 170">
+    <g stroke="#7FA6D6" stroke-width="3.5" stroke-linejoin="round" fill="#fff">
+      <circle cx="142" cy="140" r="13"/>
+      <ellipse cx="84" cy="158" rx="12" ry="8"/><ellipse cx="116" cy="158" rx="12" ry="8"/>
+      <ellipse cx="100" cy="132" rx="36" ry="28"/>
+      <ellipse cx="74" cy="128" rx="9" ry="13" transform="rotate(35 74 128)"/><ellipse cx="126" cy="128" rx="9" ry="13" transform="rotate(-35 126 128)"/>
+      <ellipse cx="44" cy="62" rx="44" ry="17" transform="rotate(-25 44 62)"/><ellipse cx="156" cy="62" rx="44" ry="17" transform="rotate(25 156 62)"/>
+      <ellipse cx="100" cy="66" rx="56" ry="46"/>
+    </g>
+    <path d="M142 140 m-6 0 a6 6 0 1 1 6 6 a3 3 0 0 1 -3 -3" fill="none" stroke="#7FA6D6" stroke-width="2.6" stroke-linecap="round"/>
+    <g style="opacity:var(--open,1)">
+      <ellipse cx="80" cy="72" rx="6.5" ry="8" fill="#4F8FDB"/><ellipse cx="120" cy="72" rx="6.5" ry="8" fill="#4F8FDB"/>
+      <circle cx="82.5" cy="68.5" r="2.4" fill="#fff"/><circle cx="122.5" cy="68.5" r="2.4" fill="#fff"/>
+    </g>
+    <path style="opacity:calc(1 - var(--open,1))" d="M73 73 q7 6 14 0M113 73 q7 6 14 0" fill="none" stroke="#4F8FDB" stroke-width="3" stroke-linecap="round"/>
+    <ellipse cx="65" cy="87" rx="9.5" ry="5.5" fill="#FFB7C9" style="transform-box:fill-box;transform-origin:center;transform:scale(calc(1 + var(--puff,0) * .45))"/>
+    <ellipse cx="135" cy="87" rx="9.5" ry="5.5" fill="#FFB7C9" style="transform-box:fill-box;transform-origin:center;transform:scale(calc(1 + var(--puff,0) * .45))"/>
+    <path style="opacity:calc(1 - var(--munch,0))" d="M94 84 q3 4 6 0 q3 4 6 0" fill="none" stroke="#7FA6D6" stroke-width="2.6" stroke-linecap="round"/>
+    <ellipse style="opacity:var(--munch,0);transform-box:fill-box;transform-origin:50% 0;transform:scaleY(var(--munch,0))" cx="100" cy="90" rx="8" ry="10" fill="#E8607E" stroke="#7FA6D6" stroke-width="2.4"/>
+  </symbol>
+  <symbol id="cloud" viewBox="0 0 120 60">
+    <path d="M22 52 C6 52 4 34 18 31 C16 16 36 10 44 22 C50 6 76 6 80 24 C96 18 110 30 102 42 C114 46 108 54 98 52 Z" fill="#fff" stroke="#F3C7CF" stroke-width="2.5" stroke-linejoin="round"/>
+  </symbol>
+</svg>
+
+<div class="sky" aria-hidden="true">
+  <svg class="cloud" style="--t:9%;--w:150px;--d:95s;--dl:-20s"><use href="#cloud"/></svg>
+  <svg class="cloud" style="--t:34%;--w:100px;--d:120s;--dl:-70s"><use href="#cloud"/></svg>
+  <svg class="cloud" style="--t:62%;--w:180px;--d:140s;--dl:-35s"><use href="#cloud"/></svg>
+  <svg class="cloud" style="--t:84%;--w:120px;--d:110s;--dl:-90s"><use href="#cloud"/></svg>
+  <span class="tw" style="top:16%;left:6%">✦</span>
+  <span class="tw" style="top:48%;right:5%;--dl:-1s;--s:20px">♡</span>
+  <span class="tw" style="top:76%;left:3%;--dl:-2s;--s:13px">✦</span>
+  <span class="tw" style="top:28%;right:14%;--dl:-1.6s;--s:12px">✿</span>
+</div>
+
+<div class="loader" id="loader" role="status">
+  <div class="win">
+    <div class="bar"><span class="t">loading.exe</span><i></i><i></i><i></i></div>
+    <div class="lb">
+      <svg viewBox="0 0 120 100" aria-hidden="true"><use href="#kitty"/></svg>
+      <p>warming up the kitchen…</p>
+      <div class="prog"><span></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <header class="top reveal">
+    <div class="logo">
+      <button id="kittyBtn" aria-label="boop hello kitty"><svg viewBox="0 0 120 100" aria-hidden="true"><use href="#kitty"/></svg></button>
+      <div class="brand">tummy diary<small>a soft little food journal ♡</small></div>
+    </div>
+    <div class="top-r">
+      <button class="pill pink" id="todayBtn" hidden>today</button>
+      <button class="pill" id="calBtn" aria-label="open calendar">📅<span class="lbl-t">calendar</span></button>
+    </div>
+  </header>
+
+  <main>
+    <div class="hero-wrap reveal" style="--d:.08s">
+      <button class="pup" id="cinna" aria-label="pet cinnamoroll"><svg viewBox="0 0 200 170" aria-hidden="true"><use href="#pup"/></svg></button>
+      <section class="win hero">
+        <div class="bar"><span class="t">today.txt</span><i></i><i></i><i></i></div>
+        <div class="hb">
+          <h1 id="hello">hello ♡</h1>
+          <div class="date-row">
+            <p class="sub" id="date"></p>
+            <div class="arrows">
+              <button class="arrow" id="prev" aria-label="previous week">‹</button>
+              <button class="arrow" id="next" aria-label="next week">›</button>
+            </div>
+          </div>
+          <div class="days" id="days"></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="row">
+      <section class="win mood-w reveal" style="--d:.16s">
+        <div class="bar"><span class="t">mood.exe</span><i></i><i></i><i></i></div>
+        <div class="pad">
+          <p class="lbl">how's your heart today?</p>
+          <div class="moods" id="moods"></div>
+          <div class="note-wrap">
+            <textarea id="note" aria-label="daily note" placeholder="dear diary… today i felt"></textarea>
+            <span class="saved" id="saved">saved ♡</span>
+          </div>
+        </div>
+      </section>
+      <section class="win stats-w reveal" style="--d:.24s">
+        <div class="bar"><span class="t">tummy.stats</span><i></i><i></i><i></i></div>
+        <div class="pad">
+          <div class="big" id="count">0</div>
+          <p class="big-l" id="countLbl">nibbles logged</p>
+          <div class="chips" id="mealStats"></div>
+          <p class="tm-l" id="tummyL">tummy happiness</p>
+          <div class="tummy" id="tummy" role="img"></div>
+          <p class="streak" id="streak"></p>
+        </div>
+      </section>
+    </div>
+
+    <section id="plate" class="reveal" style="--d:.2s">
+      <div class="plate-h"><h2>my plate ✿</h2><span>tap to edit</span></div>
+      <div class="board" id="board"></div>
+      <div class="empty" id="empty" hidden>
+        <div class="nap" aria-hidden="true">
+          <svg viewBox="0 0 200 170"><use href="#pup"/></svg>
+          <span class="z" style="--dl:0s">z</span><span class="z" style="--dl:1s">z</span><span class="z" style="--dl:2s">z</span>
+        </div>
+        <b id="emptyT">your plate is empty…</b>
+        <p id="emptyP">tap the + to log your first nibble ☁</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<button class="fab" id="fab" aria-label="add a nibble">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<div class="peek" id="peek" aria-hidden="true">
+  <span class="bubble" id="bubble"></span>
+  <span class="paw"></span>
+  <svg viewBox="0 0 120 100"><use href="#kitty"/></svg>
+</div>
+
+<div class="feeder" id="feeder" aria-hidden="true">
+  <span class="bubble" id="fbubble"></span>
+  <svg viewBox="0 0 200 170"><use href="#pup"/></svg>
+</div>
+
+<dialog id="sheet" aria-labelledby="sheetT">
+  <div class="win">
+    <div class="bar"><span class="grab"></span><span class="t" id="sheetT">new-nibble.txt</span><button class="x" data-close aria-label="close">×</button></div>
+    <form class="form" id="form">
+      <div class="photo">
+        <label class="drop" id="drop">
+          <span class="cam" aria-hidden="true">📷</span>
+          <span id="dropHint">tap to add a photo · optional</span>
+          <input type="file" id="file" accept="image/*">
+          <img id="preview" alt="photo preview" hidden>
+        </label>
+        <button type="button" class="rm" id="rmPhoto" hidden>remove ×</button>
+      </div>
+      <div class="field">
+        <label for="fName">what did you eat?</label>
+        <input class="inp" id="fName" required maxlength="80" autocomplete="off" enterkeyhint="done" placeholder="iced matcha latte, avo toast…">
+      </div>
+      <fieldset class="field">
+        <legend>which meal?</legend>
+        <div class="meals" id="meals"></div>
+      </fieldset>
+      <div class="field">
+        <label for="fTime">what time?</label>
+        <input class="inp" type="time" id="fTime" required>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn ghost" id="del" hidden>delete</button>
+        <button type="button" class="btn" data-close>cancel</button>
+        <button class="btn primary">save ♡</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<dialog id="cal" aria-label="calendar">
+  <div class="win">
+    <div class="bar"><span class="grab"></span><span class="t">calendar.app</span><button class="x" data-close aria-label="close">×</button></div>
+    <div class="pad">
+      <div class="cal-h">
+        <button class="arrow" id="cPrev" aria-label="previous month">‹</button>
+        <h3 id="cTitle"></h3>
+        <button class="arrow" id="cNext" aria-label="next month">›</button>
+      </div>
+      <div class="grid" id="cGrid"></div>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* dates: local YYYY-MM-DD keys (not toISOString, which is UTC and shifts days) */
+const pad = n => String(n).padStart(2, '0');
+const keyOf = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const dateOf = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (k, n) => { const d = dateOf(k); d.setDate(d.getDate() + n); return keyOf(d); };
+const todayKey = () => keyOf(new Date());
+const nowTime = () => { const d = new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const fmtTime = t => { const [h, m] = t.split(':').map(Number); return `${h % 12 || 12}:${pad(m)} ${h < 12 ? 'am' : 'pm'}`; };
+const esc = s => s.replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+const hash = s => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
+
+const MEALS = {
+  breakfast: { e: '🥞', c: 'var(--butter)' }, lunch: { e: '🍱', c: 'var(--blue)' },
+  dinner: { e: '🍝', c: 'var(--blush)' }, snack: { e: '🍓', c: 'var(--lav)' }, drink: { e: '🧋', c: 'var(--peach)' },
+};
+const MOODS = { love: '🥰', calm: '😌', meh: '😐', sad: '🥺', sleepy: '😴' };
+const STICKERS = ['🎀', '🌸', '💗', '⭐', '🍓', '☁️'];
+const CHEERS = ['yum! ♡', 'nom nom ♡', 'so proud of u ✿', 'tasty!!', 'good job eating ☁', 'more pls ♡'];
+const MOOD_LINES = { love: 'love that for u ♡', calm: 'so peaceful ☁', meh: 'tomorrow will be cuter ✿', sad: 'sending big hugs ♡', sleepy: 'nap time? ☁' };
+// drawn cloud instead of the ☁ glyph, which fonts render sitting too high
+const CLOUD_ICON = '<svg class="h-ico" viewBox="3 5 111 50" aria-hidden="true"><path d="M22 52 C6 52 4 34 18 31 C16 16 36 10 44 22 C50 6 76 6 80 24 C96 18 110 30 102 42 C114 46 108 54 98 52 Z"/></svg>';
+const HEART ='M12 20.5s-7-4.3-9.2-8.6C1.2 8.7 3 5 6.6 5c2.2 0 3.7 1.3 5.4 3.2C13.7 6.3 15.2 5 17.4 5 21 5 22.8 8.7 21.2 11.9 19 16.2 12 20.5 12 20.5z';
+let tummyWas = { k: null, n: 0 };
+const pick = a => a[Math.random() * a.length | 0];
+const buzz = p => { if (!calm && navigator.vibrate) navigator.vibrate(p); }; // android haptics; no-op elsewhere
+const FOOD = { matcha: '🍵', tea: '🍵', coffee: '☕', latte: '☕', boba: '🧋', smoothie: '🥤', juice: '🧃', water: '💧',
+  croissant: '🥐', bagel: '🥯', toast: '🍞', bread: '🍞', egg: '🍳', pancake: '🥞', waffle: '🧇', oat: '🥣', yogurt: '🥣', cereal: '🥣',
+  strawberr: '🍓', berr: '🫐', banana: '🍌', apple: '🍎', fruit: '🍓', avocado: '🥑', avo: '🥑', salad: '🥗', sushi: '🍣', ramen: '🍜',
+  noodle: '🍜', pho: '🍜', rice: '🍚', curry: '🍛', pasta: '🍝', spaghetti: '🍝', pizza: '🍕', burger: '🍔', fries: '🍟', taco: '🌮',
+  sandwich: '🥪', soup: '🍲', chicken: '🍗', steak: '🥩', fish: '🐟', cake: '🍰', cookie: '🍪', donut: '🍩', chocolate: '🍫',
+  'ice cream': '🍦', candy: '🍬', popcorn: '🍿', cheese: '🧀' };
+const guess = name => { for (const [k, e] of Object.entries(FOOD)) if (new RegExp('\\b' + k, 'i').test(name)) return e; return null; };
+const defaultMeal = h => h < 11 ? 'breakfast' : h < 15 ? 'lunch' : h < 18 ? 'snack' : 'dinner';
+const colCount = () => innerWidth < 600 ? 2 : innerWidth < 960 ? 3 : 4;
+// deal items round-robin so reading order runs left→right across columns
+const deal = (items, n) => Array.from({ length: n }, (_, c) => items.filter((_, i) => i % n === c));
+
+// self-check: no UTC/DST drift, keyword match only at word starts ("steak" must not match "tea"), dealing keeps every item
+console.assert(addDays('2026-03-08', 1) === '2026-03-09' && addDays('2026-01-31', 1) === '2026-02-01' && addDays('2026-11-01', -1) === '2026-10-31', 'addDays');
+console.assert(guess('steak') === '🥩' && guess('Iced matcha latte') === '🍵' && guess('xyz') === null, 'guess');
+console.assert(fmtTime('00:05') === '12:05 am' && fmtTime('13:30') === '1:30 pm', 'fmtTime');
+console.assert(JSON.stringify(deal([1, 2, 3, 4, 5], 2)) === '[[1,3,5],[2,4]]', 'deal');
+console.assert(![...Array(300)].some((_, i) => /undefined|NaN|t-/.test(card({ id: 'k' + i * 7919, name: 'x' + i, meal: 'snack', time: '10:00' }, 0, ''))), 'card decor');
+
+/* storage: IndexedDB (photos would blow localStorage's ~5MB fast), one record per day */
+const DB = new Promise((res, rej) => {
+  const r = indexedDB.open('tummy-diary', 1);
+  r.onupgradeneeded = () => r.result.createObjectStore('days');
+  r.onsuccess = () => res(r.result);
+  r.onerror = () => rej(r.error);
+});
+const tx = (mode, fn) => DB.then(db => new Promise((res, rej) => {
+  const t = db.transaction('days', mode), req = fn(t.objectStore('days'));
+  t.oncomplete = () => res(req.result);
+  t.onerror = t.onabort = () => rej(t.error);
+}));
+const blank = () => ({ items: [], mood: null, note: '' });
+const getDay = k => tx('readonly', s => s.get(k)).then(d => d || blank());
+const isEmpty = d => !d.items.length && !d.mood && !d.note.trim();
+
+let cur = todayKey(), lastToday = cur, day = blank(), logged = new Set(), editing = null, photo = null, cols = colCount();
+
+async function save(k = cur, d = day) {
+  try {
+    await tx('readwrite', s => isEmpty(d) ? s.delete(k) : s.put(d, k));
+    isEmpty(d) ? logged.delete(k) : logged.add(k);
+    renderWeek(); renderStats();
+    return true;
+  } catch {
+    toast("couldn't save that 🥺 storage may be full");
+    return false;
+  }
+}
+
+/* render */
+function renderHero() {
+  const d = dateOf(cur), h = new Date().getHours();
+  const hi = h < 5 ? 'sweet dreams' : h < 12 ? 'good morning' : h < 17 ? 'good afternoon' : h < 21 ? 'good evening' : 'sweet dreams';
+  const isToday = cur === todayKey();
+  $('#hello').textContent = isToday ? `${hi} ♡` : `a peek at ${d.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()} `;
+  if (!isToday) $('#hello').insertAdjacentHTML('beforeend', CLOUD_ICON);
+  $('#date').textContent = d.toLocaleDateString('en-US', { weekday: innerWidth < 600 ? 'short' : 'long', month: 'long', day: 'numeric', year: 'numeric' }).toLowerCase();
+  $('#todayBtn').hidden = cur === todayKey();
+  renderWeek();
+}
+
+function renderWeek() {
+  const t = todayKey(), mon = addDays(cur, -((dateOf(cur).getDay() + 6) % 7));
+  $('#days').innerHTML = [...Array(7)].map((_, i) => {
+    const k = addDays(mon, i), d = dateOf(k);
+    const cls = [k === cur && 'sel', k === t && 'today', logged.has(k) && 'has'].filter(Boolean).join(' ');
+    return `<button class="day ${cls}" data-k="${k}" ${k > t ? 'disabled' : ''} ${k === cur ? 'aria-current="date"' : ''} aria-label="${d.toDateString()}">
+      <small>${d.toLocaleDateString('en-US', { weekday: 'short' }).toLowerCase()}</small><b>${d.getDate()}</b></button>`;
+  }).join('');
+  $('#next').disabled = addDays(mon, 7) > t;
+}
+
+function renderMood() {
+  document.querySelectorAll('.mood').forEach(b => b.setAttribute('aria-pressed', b.dataset.m === day.mood));
+  $('#note').value = day.note;
+}
+
+function renderStats() {
+  const n = day.items.length;
+  $('#count').textContent = n;
+  $('#countLbl').textContent = n === 1 ? 'nibble logged' : 'nibbles logged';
+  $('#mealStats').innerHTML = Object.entries(MEALS).map(([m, v]) => {
+    const c = day.items.filter(i => i.meal === m).length;
+    return `<span class="chip" style="--bg:${v.c}" aria-label="${c} ${m}">${v.e} ${c}</span>`;
+  }).join('');
+  const got = new Set(day.items.map(i => i.meal)).size, grew = tummyWas.k === cur && got > tummyWas.n;
+  $('#tummy').innerHTML = Object.keys(MEALS).map((_, i) =>
+    `<svg viewBox="0 0 24 24" class="${i < got ? 'f' : ''} ${grew && i >= tummyWas.n && i < got ? 'pop' : ''}"><path d="${HEART}"/></svg>`).join('');
+  $('#tummy').setAttribute('aria-label', `${got} of 5 hearts`);
+  $('#tummyL').textContent = got === 5 ? 'tummy happiness · full! ✿' : `tummy happiness · ${got}/5`;
+  tummyWas = { k: cur, n: got };
+  let s = 0, k = todayKey();
+  if (!logged.has(k)) k = addDays(k, -1); // today isn't over yet, so the streak is still alive
+  while (logged.has(k)) { s++; k = addDays(k, -1); }
+  $('#streak').textContent = s ? `✿ ${s}-day streak, so proud of u` : '✿ log today to start a streak';
+}
+
+function card(it, i, cls) {
+  const m = MEALS[it.meal], h = hash(it.id + it.name);
+  const pic = it.photo
+    ? `<img src="${it.photo}" alt="" loading="lazy">`
+    : `<span class="tile" style="--bg:${m.c};--ar:${['1', '4/5', '5/4'][h % 3]}"><span>${guess(it.name) || m.e}</span></span>`;
+  const tape = h % 4 === 3
+    ? `<span class="tape c1 t${(h >>> 3) % 4}"></span><span class="tape c2 t${(h >>> 5) % 4}"></span>`
+    : `<span class="tape t${(h >>> 3) % 4}"></span>`;
+  const sticker = (h >>> 7) % 3 === 0 ? `<span class="sticker" style="--sr:${((h >>> 9) % 5 - 2) * 9}deg">${STICKERS[(h >>> 11) % STICKERS.length]}</span>` : '';
+  return `<button class="card ${cls}" style="--i:${i};--r:${((h >>> 13) % 5 - 2) * .9}deg;--tr:${((h >>> 15) % 7 - 3) * 2.5}deg" data-id="${it.id}" aria-label="${esc(it.name)}, ${it.meal}, ${fmtTime(it.time)}. tap to edit">
+    ${tape}<span class="pic">${pic}</span><span class="cap"><b>${esc(it.name)}</b><span class="meta"><span class="chip" style="--bg:${m.c}">${m.e} ${it.meal}</span><time>${fmtTime(it.time)}</time></span></span>${sticker}</button>`;
+}
+
+function renderBoard(anim, freshId, dir = 0) {
+  const items = [...day.items].sort((a, b) => a.time.localeCompare(b.time)), isToday = cur === todayKey();
+  cols = colCount();
+  const idx = new Map(items.map((it, i) => [it, i]));
+  $('#board').innerHTML = items.length ? deal(items, cols).map(col => `<div class="col">${col.map(it =>
+    card(it, idx.get(it), anim ? 'in' : it.id === freshId ? 'new' : '')).join('')}</div>`).join('') : '';
+  $('#empty').hidden = items.length > 0;
+  $('#emptyT').textContent = isToday ? 'your plate is empty…' : 'nothing logged this day';
+  $('#emptyP').textContent = isToday ? 'tap the + to log your first nibble ☁' : 'tap + to add something ☁';
+  $('#fab').classList.toggle('nudge', !items.length && isToday);
+  if (dir && !calm) $('#plate').animate([{ opacity: 0, transform: `translateX(${dir * 30}px)` }, { opacity: 1, transform: 'none' }], { duration: 450, easing: 'cubic-bezier(.2,.8,.2,1)' });
+}
+
+function render(dir, anim = true) { renderHero(); renderMood(); renderStats(); renderBoard(anim, null, dir); }
+
+let navId = 0;
+async function go(k, dir = 0) {
+  if (k === cur) return;
+  if (flushNote) await flushNote(); // finish saving the note of the day she's leaving
+  dir = dir || (k > cur ? 1 : -1);
+  const id = ++navId, d = await getDay(k).catch(blank);
+  if (id !== navId) return; // a newer tap won the race
+  cur = k; day = d; // switch key and data together, so no edit can ever land on the wrong day
+  render(dir);
+}
+
+/* dialogs */
+const vtOK = !!document.startViewTransition && !calm;
+const onScreen = el => { if (!el || !el.isConnected) return false; const r = el.getBoundingClientRect(); return r.width > 0 && r.bottom > 0 && r.top < innerHeight; };
+// shared-element morph: `from` turns into whatever getTo() returns after change() runs
+function morph(from, change, getTo) {
+  if (!vtOK || !onScreen(from)) { change(); return Promise.resolve(); }
+  from.style.viewTransitionName = 'pick';
+  let to = null;
+  const vt = document.startViewTransition(() => {
+    from.style.viewTransitionName = '';
+    change();
+    to = getTo();
+    if (onScreen(to)) to.style.viewTransitionName = 'pick'; else to = null;
+  });
+  return vt.finished.catch(() => {}).finally(() => { if (to) to.style.viewTransitionName = ''; });
+}
+// open a dialog by morphing out of the element that opened it (and remember it, to morph back into)
+function openWith(d, getFrom, after) {
+  d._from = getFrom;
+  if (vtOK && onScreen(getFrom())) d.classList.add('vt'); // the morph replaces the css pop-in
+  return morph(getFrom(), () => { d.showModal(); after && after(); }, () => d.querySelector('.win'));
+}
+function dismiss(d, getTo = d._from, change) {
+  if (!d.open || d.classList.contains('closing')) return Promise.resolve();
+  if (!vtOK) { closeDialog(d); change && change(); return Promise.resolve(); }
+  return morph(d.querySelector('.win'), () => { d.close(); change && change(); }, getTo || (() => null));
+}
+function closeDialog(d) {
+  if (!d.open || d.classList.contains('closing')) return;
+  d.classList.remove('vt'); // otherwise `animation:none` would swallow the close animation and it'd never finish
+  d.classList.add('closing');
+  d.addEventListener('animationend', () => {
+    d.classList.remove('closing');
+    d.querySelector('.win').style.transform = '';
+    d.close();
+  }, { once: true });
+}
+document.querySelectorAll('dialog').forEach(d => {
+  d.addEventListener('cancel', e => { e.preventDefault(); dismiss(d); }); // esc + android back gesture
+  d.addEventListener('click', e => { if (e.target === d || e.target.closest('[data-close]')) dismiss(d); });
+  d.addEventListener('close', () => d.classList.remove('vt'));
+  // swipe the title bar down to dismiss (phones)
+  const bar = d.querySelector('.bar'), win = d.querySelector('.win');
+  let y0 = null;
+  bar.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'touch' || e.target.closest('button')) return;
+    y0 = e.clientY; win.style.transition = 'none'; bar.setPointerCapture(e.pointerId);
+  });
+  bar.addEventListener('pointermove', e => { if (y0 !== null) win.style.transform = `translateY(${Math.max(0, e.clientY - y0)}px)`; });
+  const end = e => {
+    if (y0 === null) return;
+    const dy = e.clientY - y0;
+    y0 = null; win.style.transition = 'transform .3s var(--spring)';
+    if (dy > 70) closeDialog(d); else win.style.transform = '';
+  };
+  bar.addEventListener('pointerup', end);
+  bar.addEventListener('pointercancel', end);
+});
+
+/* add / edit sheet */
+const form = $('#form');
+$('#meals').innerHTML = Object.entries(MEALS).map(([m, v]) =>
+  `<label style="--bg:${v.c}"><input type="radio" name="meal" value="${m}"><span>${v.e} ${m}</span></label>`).join('');
+
+function showPhoto() {
+  $('#preview').hidden = $('#rmPhoto').hidden = !photo;
+  if (photo) $('#preview').src = photo;
+  $('#dropHint').textContent = 'tap to add a photo · optional';
+}
+
+function openSheet(item) {
+  editing = item ? item.id : null;
+  photo = item ? item.photo : null;
+  $('#fName').value = item ? item.name : '';
+  form.elements.meal.value = item ? item.meal : defaultMeal(new Date().getHours());
+  $('#fTime').value = item ? item.time : nowTime();
+  $('#sheetT').textContent = item ? 'edit-nibble.txt' : 'new-nibble.txt';
+  $('#del').hidden = !item;
+  $('#file').value = '';
+  showPhoto();
+  buzz(6);
+  const from = item ? () => $(`.card[data-id="${item.id}"]`) : () => $('#fab');
+  openWith($('#sheet'), from, () => {
+    $('#sheet .win').scrollTop = 0;
+    // desktop: jump straight to typing. phones: don't pop the keyboard over the sheet
+    if (matchMedia('(hover:hover)').matches) $('#fName').focus(); else $('#sheet .x').focus();
+  });
+}
+
+async function shrink(file) {
+  const img = await createImageBitmap(file);
+  const s = Math.min(1, 900 / Math.max(img.width, img.height));
+  const c = Object.assign(document.createElement('canvas'), { width: Math.round(img.width * s), height: Math.round(img.height * s) });
+  const g = c.getContext('2d');
+  g.fillStyle = '#fff'; // JPEG has no alpha: transparent PNGs would turn black
+  g.fillRect(0, 0, c.width, c.height);
+  g.drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL('image/jpeg', 0.82);
+}
+async function takePhoto(file) {
+  if (!file) return;
+  try {
+    if (!file.type.startsWith('image/')) throw 0;
+    photo = await shrink(file);
+    showPhoto();
+  } catch { $('#dropHint').textContent = "hmm, couldn't read that photo 🥺"; }
+}
+$('#file').onchange = e => takePhoto(e.target.files[0]);
+$('#rmPhoto').onclick = () => { photo = null; $('#file').value = ''; showPhoto(); };
+const drop = $('#drop');
+drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); takePhoto(e.dataTransfer.files[0]); };
+
+form.onsubmit = async e => {
+  e.preventDefault();
+  const name = $('#fName').value.trim();
+  if (!name) return $('#fName').focus();
+  const it = { id: editing || Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+    name, meal: form.elements.meal.value || 'snack', time: $('#fTime').value || nowTime(), photo };
+  const prev = day.items, wasEditing = editing;
+  day.items = editing ? day.items.map(x => x.id === editing ? it : x) : [...day.items, it];
+  if (!await save()) { day.items = prev; return; }
+  document.activeElement.blur(); // drop the android keyboard before the sheet slides away
+  if (wasEditing) {
+    dismiss($('#sheet'), () => $(`.card[data-id="${it.id}"]`), () => renderBoard(false)); // sheet shrinks back into its card
+    toast('updated ♡');
+  } else {
+    await dismiss($('#sheet'), () => $('#fab'));
+    feed(it); // the new card lands on the board once cinnamoroll has eaten it
+  }
+};
+
+$('#del').onclick = async () => {
+  const k = cur, d = day, gone = d.items.find(i => i.id === editing);
+  d.items = d.items.filter(i => i !== gone);
+  if (!await save(k, d)) { d.items.push(gone); return; }
+  closeDialog($('#sheet'));
+  renderBoard(false);
+  toast('nibble deleted', 'undo', async () => {
+    const live = cur === k ? day : await getDay(k); // never write back the stale copy: she may have changed that day since
+    live.items.push(gone);
+    if (await save(k, live) && cur === k) renderBoard(false, gone.id);
+  });
+};
+
+/* mood + note */
+$('#moods').innerHTML = Object.entries(MOODS).map(([m, e]) =>
+  `<button class="mood" data-m="${m}" aria-label="${m}" aria-pressed="false">${e}</button>`).join('');
+$('#moods').onclick = e => {
+  const b = e.target.closest('.mood');
+  if (!b) return;
+  day.mood = day.mood === b.dataset.m ? null : b.dataset.m;
+  renderMood();
+  if (!calm) b.animate([{ transform: 'scale(.8)' }, { transform: 'scale(1.25) rotate(-10deg)' }, { transform: 'scale(1.08)' }], { duration: 450, easing: 'ease-out' });
+  buzz(8);
+  if (day.mood) cheer(MOOD_LINES[day.mood]);
+  save();
+};
+let noteTimer, flushNote = null;
+$('#note').oninput = e => {
+  day.note = e.target.value;
+  const k = cur, d = day; // capture: she may switch days before the timer fires
+  clearTimeout(noteTimer);
+  flushNote = async () => {
+    flushNote = null; clearTimeout(noteTimer);
+    if (await save(k, d)) { $('#saved').classList.add('on'); setTimeout(() => $('#saved').classList.remove('on'), 1200); }
+  };
+  noteTimer = setTimeout(flushNote, 350);
+};
+
+/* calendar */
+let calMonth, calRun = 0;
+async function renderCal() {
+  const y = calMonth.getFullYear(), m = calMonth.getMonth(), t = todayKey(), now = new Date(), run = ++calRun;
+  const keys = [...Array(new Date(y, m + 1, 0).getDate())].map((_, i) => keyOf(new Date(y, m, i + 1)));
+  const data = await Promise.all(keys.map(k => logged.has(k) ? getDay(k).catch(() => null) : null));
+  if (run !== calRun) return; // a newer month tap finished first
+  $('#cTitle').textContent = new Date(y, m, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).toLowerCase();
+  $('#cNext').disabled = y > now.getFullYear() || (y === now.getFullYear() && m >= now.getMonth());
+  const blanks = '<span></span>'.repeat((new Date(y, m, 1).getDay() + 6) % 7);
+  $('#cGrid').innerHTML = ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'].map(w => `<span class="wd">${w}</span>`).join('') + blanks +
+    keys.map((k, i) => {
+      const d = data[i], ph = d && d.items.find(x => x.photo);
+      const emo = d && !ph ? (d.items[0] ? guess(d.items[0].name) || MEALS[d.items[0].meal].e : MOODS[d.mood] || '✎') : '';
+      const cls = [d && 'has', ph && 'ph', k === t && 'today', k === cur && 'sel'].filter(Boolean).join(' ');
+      return `<button class="cd ${cls}" data-k="${k}" ${k > t ? 'disabled' : ''} ${ph ? `style="background-image:url(${ph.photo})"` : ''}
+        aria-label="${dateOf(k).toDateString()}${d ? ', logged' : ''}"><span>${i + 1}</span>${emo ? `<em>${emo}</em>` : ''}</button>`;
+    }).join('');
+}
+$('#calBtn').onclick = async () => { const d = dateOf(cur); calMonth = new Date(d.getFullYear(), d.getMonth(), 1); await renderCal(); openWith($('#cal'), () => $('#calBtn')); };
+$('#cPrev').onclick = () => { calMonth.setMonth(calMonth.getMonth() - 1); renderCal(); };
+$('#cNext').onclick = () => { calMonth.setMonth(calMonth.getMonth() + 1); renderCal(); };
+$('#cGrid').onclick = e => { const b = e.target.closest('.cd'); if (b) dismiss($('#cal')).then(() => go(b.dataset.k)); };
+
+/* nav */
+$('#days').onclick = e => { const b = e.target.closest('.day'); if (b) go(b.dataset.k); };
+$('#prev').onclick = () => go(addDays(cur, -7), -1);
+$('#next').onclick = () => { const k = addDays(cur, 7), t = todayKey(); go(k > t ? t : k, 1); };
+$('#todayBtn').onclick = () => go(todayKey(), 1);
+$('#fab').onclick = () => openSheet();
+$('#board').onclick = e => { const c = e.target.closest('.card'); if (c) openSheet(day.items.find(i => i.id === c.dataset.id)); };
+addEventListener('resize', () => { if (colCount() !== cols) renderBoard(false); });
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return flushNote && flushNote(); // android may kill a backgrounded tab: save the note now
+  if (lastToday !== todayKey()) { // left open past midnight
+    const was = lastToday; lastToday = todayKey();
+    if (cur === was) go(lastToday, 1); else renderHero();
+  }
+});
+
+/* living mascots + juice */
+const center = el => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+let peekT;
+function cheer(text = pick(CHEERS)) {
+  $('#bubble').textContent = text;
+  $('#peek').classList.add('on');
+  clearTimeout(peekT);
+  peekT = setTimeout(() => $('#peek').classList.remove('on'), 2600);
+}
+
+// food token flies from the + button along an arc into a point
+function fly(it, [x0, y0], [x1, y1]) {
+  const t = document.createElement(it.photo ? 'img' : 'span');
+  t.className = 'token';
+  if (it.photo) t.src = it.photo; else t.textContent = guess(it.name) || MEALS[it.meal].e;
+  t.style.cssText = `left:${x0}px;top:${y0}px`;
+  document.body.append(t);
+  const lift = Math.min(200, innerHeight * .25);
+  const frames = [...Array(17)].map((_, i) => {
+    const p = i / 16, x = (x1 - x0) * p, y = (y1 - y0) * p - Math.sin(p * Math.PI) * lift;
+    return { transform: `translate(-50%,-50%) translate(${x}px,${y}px) rotate(${p * 420}deg) scale(${1 - p * .6})` };
+  });
+  return t.animate(frames, { duration: 720, easing: 'cubic-bezier(.45,0,.55,1)' }).finished.finally(() => t.remove());
+}
+
+let feedRun = 0;
+async function feed(it) {
+  const run = ++feedRun, nap = $('.nap'), peeker = $('#cinna');
+  // only ever one cinnamoroll: use the one she can already see, else he rises from the bottom
+  const host = !$('#empty').hidden && onScreen(nap) ? nap : onScreen(peeker) ? peeker : $('#feeder');
+  try {
+    if (calm) return cheer();
+    host.classList.remove('open', 'chew', 'talk');
+    host.classList.add('on');
+    await sleep(host === nap ? 250 : 480);
+    host.classList.add('open');
+    buzz(6);
+    await sleep(120);
+    const r = host.querySelector('svg').getBoundingClientRect(), mouth = [r.left + r.width / 2, r.top + r.height * 90 / 170];
+    await fly(it, center($('#fab')), mouth);
+    host.classList.remove('open');
+    host.classList.add('chew', 'talk');
+    buzz([14, 60, 14, 60, 14]);
+    const got = new Set(day.items.map(i => i.meal)).size, line = got === 5 ? 'tummy full!! ♡' : pick(CHEERS);
+    if (host.id === 'feeder') $('#fbubble').textContent = line; else cheer(line);
+    burst(mouth[0], mouth[1] - 10, 12, 90, '♡✦♡');
+    if (host === nap) await sleep(1300); // let him finish chewing before the first card replaces him
+  } finally {
+    renderBoard(false, it.id); // the card drops onto the board as he chews
+  }
+  await sleep(1800);
+  if (run === feedRun) host.classList.remove('on', 'open', 'chew', 'talk');
+}
+
+/* holo tilt: mouse on desktop, gyroscope on phones */
+const tiltProps = ['--rx', '--ry', '--mx', '--my', '--hx'];
+$('#board').addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse' || calm) return;
+  const c = e.target.closest('.card');
+  if (!c) return;
+  const r = c.getBoundingClientRect(), px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+  c.classList.add('tilt');
+  c.style.setProperty('--rx', `${(.5 - py) * 16}deg`);
+  c.style.setProperty('--ry', `${(px - .5) * 18}deg`);
+  c.style.setProperty('--mx', `${px * 100}%`);
+  c.style.setProperty('--my', `${py * 100}%`);
+  c.style.setProperty('--hx', `${px * 100}%`);
+});
+$('#board').addEventListener('pointerout', e => {
+  const c = e.target.closest('.card');
+  if (c && !c.contains(e.relatedTarget)) { c.classList.remove('tilt'); tiltProps.forEach(p => c.style.removeProperty(p)); }
+});
+const clamp = (v, a) => Math.max(-a, Math.min(a, v));
+let gyroBase = null, gyroRaf = 0, gx = 0, gy = 0;
+addEventListener('deviceorientation', e => {
+  if (e.beta == null || calm) return;
+  if (!gyroBase) gyroBase = { b: e.beta, g: e.gamma };
+  // the neutral pose slowly follows however she's holding the phone, so only movement tilts the cards
+  gyroBase.b += (e.beta - gyroBase.b) * .02;
+  gyroBase.g += (e.gamma - gyroBase.g) * .02;
+  gx = clamp(e.gamma - gyroBase.g, 14);
+  gy = clamp(e.beta - gyroBase.b, 14);
+  if (!gyroRaf) gyroRaf = requestAnimationFrame(() => {
+    gyroRaf = 0;
+    const s = $('#board').style;
+    s.setProperty('--gx', gx.toFixed(2));
+    s.setProperty('--gy', gy.toFixed(2));
+    s.setProperty('--holo', Math.min(1, (Math.abs(gx) + Math.abs(gy)) / 6).toFixed(2)); // shine shows while she moves
+  });
+});
+// iOS asks permission for motion; android/desktop don't need this
+addEventListener('pointerdown', () => {
+  if (typeof DeviceOrientationEvent !== 'undefined' && DeviceOrientationEvent.requestPermission) DeviceOrientationEvent.requestPermission().catch(() => {});
+}, { once: true });
+function hop(el, deg) {
+  if (!calm) el.animate([{ transform: 'none' }, { transform: `translateY(-16px) rotate(${deg}deg)` }, { transform: 'none' }], { duration: 480, easing: 'ease-out' });
+  burst(...center(el), 7, 50, '♡');
+}
+$('#cinna').onclick = e => hop(e.currentTarget, 6);
+$('#kittyBtn').onclick = e => hop(e.currentTarget, -8);
+document.addEventListener('pointerdown', e => {
+  if (!e.target.closest('input,textarea,dialog,.pup,#kittyBtn')) burst(e.clientX, e.clientY, 4, 26, '✦♡', 12);
+});
+
+let toastTimer;
+function toast(msg, action, fn) {
+  const t = $('#toast');
+  t.replaceChildren(Object.assign(document.createElement('span'), { textContent: msg }));
+  if (action) {
+    const b = Object.assign(document.createElement('button'), { textContent: action });
+    b.onclick = () => { t.classList.remove('show'); fn(); };
+    t.append(b);
+  }
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), action ? 5000 : 2200);
+}
+
+function burst(x, y, n = 12, dist = 60, chars = '♡✦✿☁', fs = 18) {
+  if (calm) return;
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement('span'), a = (i / n) * Math.PI * 2 + Math.random() * .5, d = dist * (.6 + Math.random() * .6);
+    s.className = 'spark';
+    s.textContent = chars[i % chars.length];
+    s.style.cssText = `left:${x}px;top:${y}px;--fs:${fs}px;color:${i % 2 ? 'var(--pink)' : 'var(--blue-d)'}`;
+    document.body.append(s);
+    s.animate([
+      { transform: 'translate(-50%,-50%) scale(.4)', opacity: 1 },
+      { transform: `translate(calc(-50% + ${Math.cos(a) * d}px), calc(-50% + ${Math.sin(a) * d}px)) scale(1.1) rotate(${Math.random() * 90 - 45}deg)`, opacity: 0 },
+    ], { duration: 650 + Math.random() * 300, easing: 'cubic-bezier(.2,.8,.2,1)' }).onfinish = () => s.remove();
+  }
+}
+
+/* boot */
+(async () => {
+  const minWait = sleep(calm ? 0 : 1250);
+  let failed = false;
+  try {
+    logged = new Set(await tx('readonly', s => s.getAllKeys()));
+    day = await getDay(cur);
+  } catch { failed = true; }
+  render(0, false);
+  await Promise.all([minWait, Promise.race([document.fonts.ready, sleep(2500)])]); // no font flash, but never hang offline
+  $('#loader').classList.add('done');
+  setTimeout(() => $('#loader').remove(), 700); // stop its looping animations for good
+  document.body.classList.add('ready');
+  await sleep(250);
+  renderBoard(true); // cards drop in once they're actually visible
+  if (failed) toast("couldn't open your diary storage 🥺");
+})();
+</script>
+</body>
+</html>
