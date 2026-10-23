@@ -3,159 +3,142 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-<meta name="theme-color" content="#FFF8F2">
+<meta name="theme-color" content="#FFF4EA">
 <meta name="color-scheme" content="only light">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="tummy diary">
 <title>Tummy Diary</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&family=Pixelify+Sans:wght@500&display=swap" rel="stylesheet">
 <style>
+/*
+  design rules (keep them, they're what makes it feel like one thing):
+  1. everything is a little window: 2px ink outline + one title bar style.
+  2. four colours: paper, ink, rose, sky. tints only inside photo-less food tiles.
+  3. depth: big surfaces cast a soft rose shadow; pressable things cast a small ink shadow that clicks down.
+  4. type: fredoka for headings, nunito for text, pixel font only in title bars.
+*/
 :root{
-  /* palette: one accent (rose); the other pastels only tint meal chips */
-  --bg:#FFF8F2; --ink:#4A3535; --ink2:#9C8582; --ink3:#C7B3AF; --line:#F1E3E0;
-  --rose:#EE7A99; --rose-d:#D9577C; --rose-l:#FFE3EB; --rose-ll:#FFF4F7;
-  --blush:#FFE0E8; --blue:#DDEEFF; --blue-d:#8DBFE8; --butter:#FFEDB8; --lav:#ECE3FC; --peach:#FFE3D3;
-  --pink:var(--rose);
-  --sh-1:0 1px 2px rgba(120,70,80,.06),0 6px 16px -8px rgba(170,90,110,.22);
-  --sh-2:0 2px 6px rgba(120,70,80,.05),0 22px 44px -22px rgba(190,100,130,.42);
-  --sh-rose:0 12px 24px -10px rgba(235,107,144,.7);
-  --grad-rose:linear-gradient(150deg,#F7A2B9 0%,#EC7095 100%);
+  --paper:#FFF4EA; --dot:#F0DCCF; --ink:#4E3636; --ink2:#9B8380; --ink3:#CDB9B4;
+  --rose:#F48FAB; --rose-t:#FCDDE5; --rose-tt:#FFF1F4; --shadow:#F1C3CE;
+  --sky:#BFE0F6; --sky-t:#E2F1FC; --butter-t:#FFF0C7;
+  --pink:var(--rose); --blue-d:#8DBFE8;
   --spring:cubic-bezier(.34,1.56,.64,1); --ease:cubic-bezier(.22,1,.36,1);
-  --gap:22px; --pw:116px;
+  --gap:22px; --pw:112px;
   --safe-b:env(safe-area-inset-bottom,0px);
 }
-/* registered so they animate and inherit into the mascots' <use> trees (blinks, munching, puffy cheeks) */
+/* registered so they animate and inherit into the mascots' <use> trees (blinks, puffy cheeks) */
 @property --open{syntax:'<number>';inherits:true;initial-value:1}
-@property --munch{syntax:'<number>';inherits:true;initial-value:0}
 @property --puff{syntax:'<number>';inherits:true;initial-value:0}
 
 *{box-sizing:border-box;margin:0}
-html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;background:var(--bg)}
-body{font:600 15px/1.45 'Nunito',system-ui,sans-serif;color:var(--ink);background:var(--bg);min-height:100dvh;overflow-x:hidden;overflow-x:clip;-webkit-font-smoothing:antialiased}
+html{-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;background:var(--paper)}
+body{font:700 15px/1.45 'Nunito',system-ui,sans-serif;color:var(--ink);min-height:100dvh;overflow-x:hidden;overflow-x:clip;-webkit-font-smoothing:antialiased;
+  background:var(--paper) radial-gradient(var(--dot) 1.2px,transparent 1.4px) 0 0/22px 22px}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;touch-action:manipulation;-webkit-user-select:none;user-select:none}
 button:disabled{cursor:default}
 img{-webkit-touch-callout:none}
 svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 :focus-visible{outline:3px solid var(--blue-d);outline-offset:3px}
 [hidden]{display:none!important}
-
-/* sky: soft blush / sky / butter glow over dotted paper */
-.sky{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
-  background:radial-gradient(60% 36% at 6% 0%,#FFE0EA 0%,rgba(255,224,234,0) 72%),
-    radial-gradient(52% 30% at 100% 6%,#DFEFFF 0%,rgba(223,239,255,0) 72%),
-    radial-gradient(75% 38% at 50% 104%,#FFEFD6 0%,rgba(255,239,214,0) 72%),
-    radial-gradient(rgba(210,160,150,.2) 1.1px,transparent 1.4px) 0 0/22px 22px,var(--bg)}
-.cloud{position:absolute;left:0;top:var(--t);width:var(--w);opacity:.55;animation:drift var(--d) linear infinite;animation-delay:var(--dl)}
-@keyframes drift{from{transform:translateX(-30vw)}to{transform:translateX(110vw)}}
-.tw{position:absolute;color:var(--rose);opacity:.4;font-size:var(--s,15px);animation:tw 3.4s ease-in-out infinite;animation-delay:var(--dl,0s)}
-@keyframes tw{50%{transform:scale(.6) rotate(25deg);opacity:.12}}
 @keyframes bob{50%{transform:translateY(-5px) rotate(-2deg)}}
+@keyframes pop{from{opacity:0;transform:translateY(22px) scale(.9)}}
+@keyframes fade{from{opacity:0}}
 /* blinks: JS toggles .shut at random gaps; nothing runs between blinks */
 [data-blink]{transition:--open .06s}
 .shut{--open:0}
 
+/* the window: the one container everything is built from */
+.win{position:relative;background:#fff;border:2px solid var(--ink);border-radius:18px;box-shadow:4px 4px 0 var(--shadow);overflow:hidden}
+.bar{display:flex;align-items:center;gap:6px;height:36px;padding:0 12px 0 14px;background:var(--rose-t);border-bottom:2px solid var(--ink);font:500 13px 'Pixelify Sans',monospace;letter-spacing:.3px}
+.bar .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar i{width:11px;height:11px;border:1.6px solid var(--ink);border-radius:3px;background:#fff}
+.bar i:last-child{background:var(--rose)}
+.body{padding:16px}
+/* pressable: ink outline + small ink shadow that clicks down */
+.press{border:2px solid var(--ink);background:#fff;box-shadow:2px 2px 0 var(--ink);transition:transform .15s ease,box-shadow .15s ease}
+.press:active:not(:disabled){transform:translate(2px,2px);box-shadow:0 0 0 var(--ink)}
+.press:disabled{opacity:.35;box-shadow:none}
+
 /* loader */
-.loader{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:var(--bg);transition:opacity .6s ease,visibility .6s}
+.loader{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:inherit;transition:opacity .55s ease,visibility .55s}
 .loader.done{opacity:0;visibility:hidden}
-.lb{display:grid;justify-items:center;gap:12px;transition:transform .6s var(--ease)}
-.loader.done .lb{transform:scale(.94) translateY(-12px)}
-.lb svg{width:108px;animation:hop .7s ease-in-out infinite alternate}
-@keyframes hop{to{transform:translateY(-10px) rotate(3deg)}}
-.lb b{font:700 26px 'Fredoka',sans-serif;letter-spacing:-.3px;margin-top:6px}
-.lb p{font-size:13px;font-weight:800;color:var(--ink2)}
-.prog{width:140px;height:7px;margin-top:4px;border-radius:99px;background:var(--rose-l);overflow:hidden}
-.prog span{display:block;height:100%;width:0;border-radius:inherit;background:var(--grad-rose);animation:load 1.15s cubic-bezier(.6,0,.3,1) forwards}
+.loader .win{width:min(290px,calc(100vw - 48px));transition:transform .55s var(--spring)}
+.loader.done .win{transform:scale(.92) translateY(-12px)}
+.lb{padding:24px 22px 22px;display:grid;justify-items:center;gap:14px}
+.lb svg{width:92px;animation:hop .7s ease-in-out infinite alternate}
+@keyframes hop{to{transform:translateY(-9px) rotate(3deg)}}
+.lb p{font-weight:800;font-size:14px}
+.prog{width:100%;height:18px;border:2px solid var(--ink);border-radius:99px;overflow:hidden;background:#fff}
+.prog span{display:block;height:100%;width:0;background:repeating-linear-gradient(45deg,var(--rose) 0 9px,var(--rose-t) 9px 18px);background-size:25.46px 100%;animation:load 1.15s cubic-bezier(.6,0,.3,1) forwards,stripes .6s linear infinite}
 @keyframes load{to{width:100%}}
+@keyframes stripes{to{background-position:25.46px 0}}
 
 /* entrance */
 .reveal{opacity:0}
-body.ready .reveal{animation:rise .9s var(--ease) forwards;animation-delay:var(--d,0s)}
-@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+body.ready .reveal{animation:rise .8s var(--ease) forwards;animation-delay:var(--d,0s)}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 
-/* layout */
-.wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:calc(8px + env(safe-area-inset-top,0px)) 18px calc(132px + var(--safe-b))}
-.top{display:flex;align-items:center;gap:10px;padding:8px 0 2px}
-.logo{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
-#kittyBtn{flex:none}
-#kittyBtn svg{display:block;width:48px;animation:bob 3.4s ease-in-out infinite}
-.brand{font:700 22px/1 'Fredoka',sans-serif;letter-spacing:-.2px;white-space:nowrap}
-.brand small{display:block;font:800 11.5px 'Nunito';color:var(--ink2);margin-top:5px;letter-spacing:.1px}
-.icon-btn{width:44px;height:44px;flex:none;border-radius:50%;background:#fff;box-shadow:var(--sh-1);display:grid;place-items:center;transition:transform .3s var(--spring)}
-.icon-btn:active{transform:scale(.9)}
-.chip-btn{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 15px;border-radius:99px;background:#fff;box-shadow:var(--sh-1);font-weight:900;font-size:13px;white-space:nowrap;transition:transform .3s var(--spring)}
-.chip-btn:active{transform:scale(.94)}
-.chip-btn svg.i{width:17px;height:17px}
-#todayBtn{background:var(--rose-l);color:var(--rose-d);box-shadow:none}
-.layout{display:grid;gap:18px;margin-top:8px}
+/* page */
+.wrap{max-width:1160px;margin:0 auto;padding:calc(10px + env(safe-area-inset-top,0px)) 16px calc(124px + var(--safe-b))}
+.top{display:flex;align-items:center;gap:10px;height:56px}
+#kittyBtn svg{display:block;width:46px;animation:bob 3.4s ease-in-out infinite}
+.brand{flex:1;font:600 21px 'Fredoka',sans-serif;letter-spacing:-.2px}
+.icon-btn{width:44px;height:44px;border-radius:14px;display:grid;place-items:center}
+.layout{display:grid;gap:26px;margin-top:4px}
 .side{display:contents}
-.panel{position:relative;background:#fff;border-radius:28px;box-shadow:var(--sh-2)}
 
-/* hero: greeting + week, cinnamoroll peeks over the week card */
-.hero{order:1;display:grid;gap:14px}
-.greet{padding:6px 4px 0}
-.greet h1{font:700 clamp(31px,8.4vw,40px)/1.06 'Fredoka',sans-serif;letter-spacing:-.6px;text-wrap:balance}
-.sub{margin-top:6px;font-size:14px;font-weight:800;color:var(--ink2)}
-/* drawn cloud sized to the lowercase letters and centred on them */
-.h-ico{display:inline-block;width:1.1em;height:.5em;vertical-align:.02em;fill:currentColor}
-.weekwrap{position:relative;margin-top:calc(var(--pw) * .36)}
-.pup{position:absolute;z-index:0;right:22px;top:calc(var(--pw) * -.5);width:var(--pw);animation:peek 4s ease-in-out infinite;transform-origin:50% 100%;transition:transform .45s var(--spring)}
+/* today window: greeting, week strip, tummy row; cinnamoroll peeks over its top edge */
+.todaywrap{order:1;position:relative;margin-top:calc(var(--pw) * .42)}
+.pup{position:absolute;z-index:0;right:26px;top:calc(var(--pw) * -.5);width:var(--pw);animation:peek 4s ease-in-out infinite;transform-origin:50% 100%;transition:transform .45s var(--spring)}
 .pup svg{display:block;width:100%}
 @keyframes peek{0%,100%{transform:translateY(0)}50%{transform:translateY(5px) rotate(2deg)}}
-.week{z-index:1;padding:14px 12px 16px}
-.wk-h{display:flex;align-items:center;justify-content:space-between;padding:0 4px 10px}
-.wk-h b{font:600 16px 'Fredoka',sans-serif}
-.arrows{display:flex;gap:6px}
-.arrow{width:44px;height:44px;border-radius:50%;background:var(--rose-ll);color:var(--ink);display:grid;place-items:center;transition:transform .3s var(--spring),opacity .2s}
-.arrow svg.i{width:18px;height:18px}
-.arrow:active:not(:disabled){transform:scale(.88)}
-.arrow:disabled{opacity:.3}
-.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
-.day{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;height:66px;border-radius:18px;transition:transform .35s var(--spring),background .25s}
+.today{z-index:1}
+.today h1{font:700 30px/1.1 'Fredoka',sans-serif;letter-spacing:-.4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.date-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px}
+.sub{font-size:14px;font-weight:800;color:var(--ink2)}
+.arrows{display:flex;gap:8px}
+.arrow{width:38px;height:38px;border-radius:12px;display:grid;place-items:center}
+.arrow svg.i{width:17px;height:17px}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:14px}
+.day{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;height:58px;border:2px solid transparent;border-radius:14px;transition:background .2s,transform .15s}
 .day small{font-size:11px;font-weight:800;color:var(--ink2)}
-.day b{font:600 19px 'Fredoka',sans-serif}
-.day:active:not(:disabled){transform:scale(.92)}
-.day.today:not(.sel) b{color:var(--rose-d)}
-.day.today:not(.sel){box-shadow:inset 0 0 0 1.6px var(--rose-l);background:var(--rose-ll)}
-.day.sel{background:var(--grad-rose);color:#fff;box-shadow:var(--sh-rose);transform:translateY(-2px)}
-.day.sel small{color:rgba(255,255,255,.85)}
-.day.has::after{content:'';position:absolute;bottom:7px;width:5px;height:5px;border-radius:50%;background:var(--rose);animation:pop .4s var(--spring)}
-.day.sel.has::after{background:#fff}
-.day:disabled{opacity:.32}
-
-/* today summary */
-.summary{order:2;padding:18px 18px 16px;background:linear-gradient(135deg,#FFE7EF 0%,#FFF2E9 55%,#EAF4FF 100%);box-shadow:var(--sh-1)}
-.sum-top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
-.count b{display:block;font:700 46px/.95 'Fredoka',sans-serif;color:var(--rose-d);letter-spacing:-1px}
-.count span{display:block;margin-top:6px;font-size:13px;font-weight:800;color:var(--ink2)}
-.tm{text-align:right}
-.tummy{display:flex;gap:4px;justify-content:flex-end}
-.tummy svg{width:23px;height:23px;fill:rgba(255,255,255,.75);stroke:var(--ink3);stroke-width:1.6;overflow:visible}
-.tummy svg.f{fill:var(--rose);stroke:var(--rose-d)}
+.day b{font:600 18px 'Fredoka',sans-serif}
+.day:active:not(:disabled){transform:scale(.93)}
+.day.today:not(.sel){border:2px dashed var(--rose)}
+.day.sel{background:var(--rose);border-color:var(--ink);box-shadow:2px 2px 0 var(--ink)}
+.day.sel small{color:var(--ink)}
+.day.has::after{content:'';position:absolute;bottom:6px;width:5px;height:5px;border-radius:50%;background:var(--rose)}
+.day.sel.has::after{background:var(--ink)}
+.day:disabled{opacity:.3}
+.tummy-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding-top:14px;border-top:2px dashed var(--rose-t)}
+.tm-l{font-size:12px;font-weight:800;color:var(--ink2)}
+.tummy{display:flex;gap:3px;margin-top:4px}
+.tummy svg{width:22px;height:22px;fill:#fff;stroke:var(--ink);stroke-width:1.7;overflow:visible}
+.tummy svg.f{fill:var(--rose)}
 .tummy svg.pop{animation:heartPop .7s var(--spring)}
 @keyframes heartPop{0%{transform:scale(.2)}55%{transform:scale(1.4)}}
-.tm span{display:block;margin-top:6px;font-size:12px;font-weight:800;color:var(--ink2)}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
-.chip{display:inline-flex;align-items:center;gap:4px;background:var(--bg,#fff);border-radius:99px;padding:3px 9px;font-size:12px;font-weight:900;white-space:nowrap;color:var(--ink)}
-.chips .chip{background:rgba(255,255,255,.7)}
-.streak{margin-top:12px;font-size:13px;font-weight:800;color:var(--ink2)}
+.count{text-align:right}
+.count b{display:block;font:700 30px/1 'Fredoka',sans-serif}
+.count span{font-size:12px;font-weight:800;color:var(--ink2)}
+.streak{margin-top:10px;font-size:12px;font-weight:800;color:var(--ink2)}
 
-/* scrapbook board: JS deals cards into columns left→right so time order reads like a row */
-#plate{order:3}
-.plate-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 2px 18px}
-.plate-h h2{font:700 25px 'Fredoka',sans-serif;letter-spacing:-.3px}
-.plate-h h2 span{color:var(--rose)}
+/* board: JS deals cards into columns left→right so time order reads like a row */
+#plate{order:2}
+.plate-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 2px 20px}
+.plate-h h2{font:600 22px 'Fredoka',sans-serif}
+.btn-s{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 14px;border-radius:12px;font-size:13px;font-weight:900}
+.btn-s svg.i{width:16px;height:16px}
 .board{display:flex;align-items:flex-start;gap:var(--gap)}
 .col{flex:1;min-width:0;display:flex;flex-direction:column;gap:calc(var(--gap) + 12px)}
-/* tilt comes from the phone gyro (--gx/--gy on .board) or, on desktop, from the mouse (inline --rx/--ry) */
+/* polaroids. tilt comes from the phone gyro (--gx/--gy on .board) or, on desktop, the mouse (inline --rx/--ry) */
 .card{--rx:calc(var(--gy,0) * -1deg);--ry:calc(var(--gx,0) * 1deg);--mx:calc(50% + var(--gx,0) * 4%);--my:calc(50% - var(--gy,0) * 4%);--hx:calc(50% + var(--gx,0) * 7%);
-  position:relative;display:block;width:100%;text-align:left;padding:8px 8px 0;background:#fff;border:1.8px solid var(--ink);border-radius:14px;
-  box-shadow:0 2px 3px rgba(110,60,70,.08),0 16px 30px -16px rgba(170,85,110,.55);
-  transform:perspective(800px) rotateX(var(--rx)) rotateY(var(--ry)) rotate(var(--r));transition:transform .45s var(--spring),box-shadow .45s var(--ease)}
+  position:relative;display:block;width:100%;text-align:left;padding:10px 10px 0;background:#fff;border:2.5px solid var(--ink);border-radius:10px;
+  box-shadow:3px 4px 0 var(--shadow);transform:perspective(800px) rotateX(var(--rx)) rotateY(var(--ry)) rotate(var(--r));transition:transform .4s var(--spring),box-shadow .4s var(--spring)}
 .card.tilt{--holo:1;transition:transform .12s ease-out,box-shadow .3s}
 .card:active{transform:perspective(800px) rotateX(var(--rx)) rotateY(var(--ry)) rotate(var(--r)) scale(.97)}
-.pic{position:relative;display:block;border-radius:9px;overflow:hidden;isolation:isolate}
+.pic{position:relative;display:block;border-radius:6px;overflow:hidden;isolation:isolate}
 .pic::before,.pic::after{content:'';position:absolute;z-index:1;inset:0;pointer-events:none;opacity:var(--holo,0);display:none}
 .board.shine .pic::before,.board.shine .pic::after,.card.tilt .pic::before,.card.tilt .pic::after{display:block}
 /* foil: repeating rainbow bands that slide with the tilt */
@@ -164,220 +147,206 @@ body.ready .reveal{animation:rise .9s var(--ease) forwards;animation-delay:var(-
 /* glare: a soft light spot under the finger / mouse */
 .pic::after{mix-blend-mode:soft-light;background:radial-gradient(circle at var(--mx) var(--my),#fff,rgba(255,255,255,.35) 25%,rgba(255,255,255,0) 55%)}
 .card img,.tile{display:block;width:100%}
-.card img{height:auto;max-height:440px;object-fit:cover;background:var(--rose-ll)}
-.tile{display:grid;place-items:center;aspect-ratio:var(--ar);background:var(--bg) radial-gradient(rgba(255,255,255,.7) 2px,transparent 2px) 0 0/15px 15px}
-.tile span{font-size:clamp(40px,11vw,58px);filter:drop-shadow(0 4px 0 rgba(74,53,53,.1));transition:transform .45s var(--spring)}
-.cap{display:grid;gap:7px;padding:10px 3px 11px}
-.cap b{font:600 16px/1.22 'Fredoka',sans-serif;overflow-wrap:anywhere}
-.meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 8px;white-space:nowrap;font-size:11.5px;font-weight:800;color:var(--ink2)}
-.meta .chip{font-size:11px;padding:2px 8px}
-.tape{position:absolute;z-index:2;top:-10px;left:50%;width:66px;height:20px;transform:translateX(-50%) rotate(var(--tr));opacity:.88;
+.card img{height:auto;max-height:440px;object-fit:cover;background:var(--rose-tt)}
+.tile{display:grid;place-items:center;aspect-ratio:var(--ar);background:var(--bg) radial-gradient(rgba(255,255,255,.7) 2px,transparent 2px) 0 0/16px 16px}
+.tile span{font-size:clamp(40px,11vw,60px);filter:drop-shadow(0 4px 0 rgba(78,54,54,.12));transition:transform .45s var(--spring)}
+.cap{display:grid;gap:8px;padding:10px 3px 12px}
+.cap b{font:600 17px/1.2 'Fredoka',sans-serif;overflow-wrap:anywhere}
+.meta{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 8px;white-space:nowrap;font-size:12px;font-weight:800;color:var(--ink2)}
+.chip{display:inline-flex;align-items:center;gap:4px;border:1.6px solid var(--ink);border-radius:99px;padding:2px 9px;font-size:12px;font-weight:900;color:var(--ink);background:#fff}
+.tape{position:absolute;z-index:2;top:-12px;left:50%;width:78px;height:23px;transform:translateX(-50%) rotate(var(--tr));opacity:.93;
   clip-path:polygon(0 0,100% 0,97% 25%,100% 50%,97% 75%,100% 100%,0 100%,3% 75%,0 50%,3% 25%)}
-.tape.c1{left:-14px;top:5px;width:50px;transform:rotate(-38deg)}
-.tape.c2{left:auto;right:-14px;top:5px;width:50px;transform:rotate(38deg)}
+.tape.c1{left:-16px;top:4px;width:60px;transform:rotate(-38deg)}
+.tape.c2{left:auto;right:-16px;top:4px;width:60px;transform:rotate(38deg)}
 .t0{background:repeating-linear-gradient(45deg,#F7B9C6 0 6px,#FDE1E7 6px 12px)}
 .t1{background:radial-gradient(#fff 2px,transparent 2.5px) 0 0/9px 9px,#B9DCF3}
 .t2{background:linear-gradient(90deg,rgba(255,255,255,.55) 50%,transparent 0) 0 0/10px 10px,linear-gradient(rgba(255,255,255,.55) 50%,transparent 0) 0 0/10px 10px,#FFE08F}
 .t3{background:repeating-linear-gradient(90deg,#E2D4F6 0 8px,#D2C1F0 8px 10px)}
-.sticker{position:absolute;right:-11px;bottom:42px;font-size:27px;line-height:1;transform:rotate(var(--sr));pointer-events:none;
-  text-shadow:1.5px 0 #fff,-1.5px 0 #fff,0 1.5px #fff,0 -1.5px #fff,1.5px 1.5px #fff,-1.5px -1.5px #fff,1px 3px 3px rgba(74,53,53,.3)}
-.in{animation:drop .75s var(--spring) backwards;animation-delay:calc(var(--i) * 70ms)}
-.new{animation:drop .85s var(--spring) backwards}
+.sticker{position:absolute;right:-12px;bottom:44px;font-size:30px;line-height:1;transform:rotate(var(--sr));pointer-events:none;
+  text-shadow:1.5px 0 #fff,-1.5px 0 #fff,0 1.5px #fff,0 -1.5px #fff,1.5px 1.5px #fff,-1.5px -1.5px #fff,1px 3px 3px rgba(78,54,54,.3)}
+.in{animation:drop .7s var(--spring) backwards;animation-delay:calc(var(--i) * 70ms)}
+.new{animation:drop .8s var(--spring) backwards}
 @keyframes drop{from{opacity:0;transform:translateY(-30px) rotate(calc(var(--r) * -4)) scale(.9)}}
-@keyframes pop{from{opacity:0;transform:translateY(22px) scale(.9)}}
 
 /* empty: cinnamoroll naps */
-.empty{display:grid;justify-items:center;text-align:center;gap:5px;padding:4px 20px 8px;animation:pop .6s var(--spring)}
-.nap{position:relative;width:150px;margin-bottom:4px}
+.empty{display:grid;justify-items:center;text-align:center;gap:4px;padding:6px 20px 10px;animation:pop .6s var(--spring)}
+.nap{position:relative;width:150px;margin-bottom:6px}
 .nap svg{display:block;width:100%;--open:0;transform-origin:50% 100%;animation:breathe 3.2s ease-in-out infinite}
 @keyframes breathe{50%{transform:scale(1.03,.97)}}
-.z{position:absolute;right:20px;top:10px;font:700 19px 'Fredoka',sans-serif;color:var(--blue-d);opacity:0;animation:zz 3s ease-in infinite;animation-delay:var(--dl)}
+.z{position:absolute;right:20px;top:10px;font:700 18px 'Fredoka',sans-serif;color:var(--blue-d);opacity:0;animation:zz 3s ease-in infinite;animation-delay:var(--dl)}
 @keyframes zz{0%{opacity:0;transform:translate(0,0) scale(.6)}30%{opacity:1}100%{opacity:0;transform:translate(24px,-44px) scale(1.3)}}
-.empty b{font:600 19px 'Fredoka',sans-serif}
-.empty p{font-size:14px;font-weight:700;color:var(--ink2)}
+.empty b{font:600 18px 'Fredoka',sans-serif}
+.empty p{font-size:14px;color:var(--ink2)}
 
-/* mood + diary */
-.mood-p{order:4;padding:18px 16px 16px}
-.p-h{display:flex;align-items:baseline;justify-content:space-between;padding:0 4px 12px}
-.p-h h3{font:600 18px 'Fredoka',sans-serif}
-.saved{font-size:12px;font-weight:900;color:var(--rose);opacity:0;transform:translateY(3px);transition:.3s;pointer-events:none}
-.saved.on{opacity:1;transform:none}
+/* mood window */
+.moodwin{order:3}
+.saved{font:700 12px 'Nunito';color:var(--ink);opacity:0;transition:opacity .3s;margin-right:6px}
+.saved.on{opacity:1}
+.lbl{font:600 16px 'Fredoka',sans-serif;margin-bottom:12px}
 .moods{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}
-.mood{justify-self:center;width:100%;max-width:58px;aspect-ratio:1;border-radius:50%;background:var(--rose-ll);font-size:27px;line-height:1;display:grid;place-items:center;transition:transform .4s var(--spring),opacity .3s,filter .3s,box-shadow .3s,background .3s}
-.mood:active{transform:scale(.86)}
-.mood[aria-pressed=true]{background:#fff;box-shadow:0 0 0 2.5px var(--rose),var(--sh-rose);transform:scale(1.1)}
-.moods:has([aria-pressed=true]) .mood:not([aria-pressed=true]){opacity:.5;filter:saturate(.5)}
-textarea{display:block;width:100%;min-height:96px;resize:vertical;padding:4px 14px;border:0;border-radius:18px;font:600 16px/28px 'Nunito';color:var(--ink);
-  background:repeating-linear-gradient(transparent 0 27px,rgba(238,122,153,.16) 27px 28px) var(--rose-ll);background-attachment:local;transition:box-shadow .25s}
-textarea:focus{outline:none;box-shadow:0 0 0 3px var(--rose-l)}
+.mood{justify-self:center;width:100%;max-width:54px;aspect-ratio:1;border-radius:50%;border:2px solid transparent;background:var(--rose-tt);font-size:26px;line-height:1;display:grid;place-items:center;transition:transform .35s var(--spring),opacity .25s,background .2s}
+.mood:active{transform:scale(.88)}
+.mood[aria-pressed=true]{background:var(--rose);border-color:var(--ink);box-shadow:2px 2px 0 var(--ink);transform:scale(1.06)}
+.moods:has([aria-pressed=true]) .mood:not([aria-pressed=true]){opacity:.45}
+textarea{display:block;width:100%;min-height:92px;resize:vertical;padding:2px 14px;border:2px dashed var(--shadow);border-radius:14px;font:700 16px/28px 'Nunito';color:var(--ink);
+  background:repeating-linear-gradient(#fff 0 27px,var(--rose-tt) 27px 28px);background-attachment:local;transition:border-color .2s}
+textarea:focus{outline:none;border-style:solid;border-color:var(--rose)}
 textarea::placeholder{color:var(--ink3)}
 
 /* fab */
-.fab{position:fixed;right:18px;bottom:calc(20px + var(--safe-b));z-index:20;width:62px;height:62px;border-radius:50%;background:var(--grad-rose);color:#fff;display:grid;place-items:center;
-  box-shadow:0 16px 30px -10px rgba(235,107,144,.75),inset 0 1px 0 rgba(255,255,255,.45);transition:transform .4s var(--spring)}
+.fab{position:fixed;right:18px;bottom:calc(20px + var(--safe-b));z-index:20;width:62px;height:62px;border-radius:50%;background:var(--rose);color:#fff;display:grid;place-items:center;box-shadow:3px 3px 0 var(--ink)}
 .fab svg{width:28px;transition:transform .45s var(--spring)}
-.fab:active{transform:scale(.9)}
-.fab::after{content:'add a nibble';position:absolute;right:76px;white-space:nowrap;background:#fff;border-radius:99px;padding:7px 14px;font-weight:900;font-size:13px;color:var(--ink);box-shadow:var(--sh-1);opacity:0;transform:translateX(8px);transition:.3s var(--spring);pointer-events:none}
-.fab::before{content:'';position:absolute;inset:0;border-radius:50%;border:3px solid var(--rose);opacity:0;pointer-events:none}
+.fab::after{content:'add a nibble';position:absolute;right:76px;white-space:nowrap;background:#fff;border:2px solid var(--ink);border-radius:12px;padding:6px 12px;font-weight:900;font-size:13px;color:var(--ink);opacity:0;transform:translateX(8px);transition:.3s var(--spring);pointer-events:none}
+.fab::before{content:'';position:absolute;inset:-2px;border-radius:50%;border:3px solid var(--rose);opacity:0;pointer-events:none}
 .fab.nudge::before{animation:ring 2.2s ease-out infinite}
-@keyframes ring{0%{transform:scale(1);opacity:.7}70%,100%{transform:scale(1.55);opacity:0}}
+@keyframes ring{0%{transform:scale(1);opacity:.7}70%,100%{transform:scale(1.5);opacity:0}}
 .spark{position:fixed;z-index:60;pointer-events:none;font-size:var(--fs,18px);font-weight:900}
 
 /* kitty pops up from the bottom edge and waves */
-.peek{position:fixed;left:clamp(14px,4vw,40px);bottom:0;z-index:30;width:104px;transform:translateY(115%);transition:transform .55s var(--spring);pointer-events:none}
+.peek{position:fixed;left:16px;bottom:0;z-index:30;width:100px;transform:translateY(115%);transition:transform .55s var(--spring);pointer-events:none}
 .peek.on{transform:translateY(24%)}
 .peek svg{position:relative;display:block;width:100%}
-.paw{position:absolute;left:81px;top:20px;width:22px;height:28px;background:#fff;border:2.4px solid #5B3A3A;border-radius:50%;transform-origin:50% 100%}
+.paw{position:absolute;left:78px;top:19px;width:21px;height:27px;background:#fff;border:2.4px solid #5B3A3A;border-radius:50%;transform-origin:50% 100%}
 .peek.on .paw{animation:wave .4s ease-in-out infinite alternate}
 @keyframes wave{from{transform:rotate(-15deg)}to{transform:rotate(30deg)}}
-.bubble{position:absolute;bottom:calc(100% - 2px);background:#fff;border:1.8px solid var(--ink);border-radius:18px 18px 18px 6px;padding:7px 14px;font:600 15px 'Fredoka',sans-serif;white-space:nowrap;box-shadow:var(--sh-2)}
+.bubble{position:absolute;bottom:calc(100% - 2px);background:#fff;border:2px solid var(--ink);border-radius:14px 14px 14px 4px;padding:6px 12px;font:600 15px 'Fredoka',sans-serif;white-space:nowrap;box-shadow:2px 2px 0 var(--ink)}
 .peek .bubble{left:62%}
 .peek.on .bubble{animation:pop .5s var(--spring) .25s both}
 
-/* feed cinnamoroll: whichever one is on screen eats; the napping one wakes, the peeking one stretches up */
-.feeder{position:fixed;left:50%;bottom:0;z-index:31;width:170px;margin-left:-85px;transform:translateY(110%);transition:transform .55s var(--spring);pointer-events:none}
+/* feed: whichever cinnamoroll is on screen eats (mouth closed, puffy cheeks) */
+.feeder{position:fixed;left:50%;bottom:0;z-index:31;width:160px;margin-left:-80px;transform:translateY(110%);transition:transform .55s var(--spring);pointer-events:none}
 .feeder.on{transform:translateY(16%)}
 .feeder svg{display:block;width:100%;transform-origin:50% 100%}
-.feeder svg,.nap svg,.pup svg{transition:--munch .15s ease-out,--open .06s}
+.feeder svg,.nap svg,.pup svg{transition:--open .06s}
 .nap.on svg{--open:1;animation:none}
 .nap.on .z{display:none}
-.pup.on{animation:none;transform:translateY(-26%)}
-.feeder.open svg,.nap.open svg,.pup.open svg{--munch:1}
+.pup.on{animation:none;transform:translateY(-22%)}
 .feeder.chew svg,.nap.chew svg,.pup.chew svg{animation:chew .2s ease-in-out 6 alternate}
-@keyframes chew{to{transform:scale(1.07,.93);--puff:1}}
+@keyframes chew{to{transform:scale(1.06,.94);--puff:1}}
 .feeder .bubble{left:60%;opacity:0}
 .feeder.talk .bubble{opacity:1;animation:pop .45s var(--spring) both}
-.token{position:fixed;z-index:32;width:58px;height:58px;border-radius:50%;object-fit:cover;border:3px solid #fff;box-shadow:0 8px 18px rgba(74,53,53,.3);pointer-events:none}
-span.token{display:grid;place-items:center;border:0;box-shadow:none;font-size:44px;line-height:1;filter:drop-shadow(0 4px 4px rgba(74,53,53,.25))}
-.rain{position:fixed;top:0;z-index:61;font-size:32px;line-height:1;pointer-events:none}
+.token{position:fixed;z-index:32;width:56px;height:56px;border-radius:50%;object-fit:cover;border:2.5px solid var(--ink);pointer-events:none}
+span.token{display:grid;place-items:center;border:0;font-size:42px;line-height:1}
+.rain{position:fixed;top:0;z-index:61;font-size:30px;line-height:1;pointer-events:none}
 
-/* shared-element morphs (View Transitions API, desktop) */
+/* shared-element morphs (View Transitions API, desktop only) */
 ::view-transition-group(pick){animation-duration:.5s;animation-timing-function:cubic-bezier(.3,1.2,.4,1)}
 ::view-transition-old(pick),::view-transition-new(pick){height:100%;object-fit:cover;animation-duration:.28s}
 ::view-transition-group(root){animation-duration:.3s}
 dialog.vt[open]{animation:none}
 
-/* dialogs: centred cards on desktop, bottom sheets that slide up on phones */
+/* dialogs: centred windows on desktop, bottom sheets that slide up on phones */
 dialog{margin:auto;border:0;padding:0;background:none;width:calc(100% - 32px);max-width:440px;overflow:visible;color:var(--ink)}
-dialog .win{background:#fff;border-radius:30px;box-shadow:0 30px 80px -24px rgba(90,40,55,.5);max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain;outline:none}
-dialog[open]{animation:dlg .5s var(--spring)}
+dialog .win{max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain;outline:none;box-shadow:5px 5px 0 var(--shadow)}
+dialog[open]{animation:dlg .45s var(--spring)}
 dialog.closing{animation:dlgOut .22s ease-in forwards}
-dialog::backdrop{background:rgba(74,40,52,.26);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);animation:fade .35s}
+dialog::backdrop{background:rgba(78,54,54,.32);animation:fade .3s}
 dialog.closing::backdrop{animation:fade .22s reverse forwards}
-@keyframes dlg{from{opacity:0;transform:translateY(30px) scale(.94)}}
-@keyframes dlgOut{to{opacity:0;transform:translateY(18px) scale(.96)}}
-@keyframes fade{from{opacity:0}}
-dialog .bar{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:8px;padding:18px 14px 8px 22px;background:#fff}
-dialog .bar .t{flex:1;font:700 21px 'Fredoka',sans-serif;letter-spacing:-.2px}
-.x{width:44px;height:44px;border-radius:50%;background:var(--rose-ll);display:grid;place-items:center;transition:transform .3s var(--spring)}
-.x:active{transform:scale(.88)}
-.x svg.i{width:18px;height:18px}
+@keyframes dlg{from{opacity:0;transform:translateY(26px) scale(.95)}}
+@keyframes dlgOut{to{opacity:0;transform:translateY(16px) scale(.97)}}
+dialog .bar{position:sticky;top:0;z-index:3;height:46px}
+.x{width:44px;height:44px;margin-right:-10px;border-radius:12px;display:grid;place-items:center}
+.x svg.i{width:17px;height:17px}
 .grab{display:none}
-.form{display:grid;gap:18px;padding:8px 20px 22px}
+.form{display:grid;gap:18px;padding:18px}
 .photo{position:relative}
-.drop{position:relative;display:grid;place-items:center;align-content:center;gap:8px;min-height:150px;border:2px dashed #F4B6C7;border-radius:22px;background:var(--rose-ll);cursor:pointer;text-align:center;font-weight:800;font-size:14px;color:var(--ink2);overflow:hidden;transition:background .2s,border-color .2s}
-.drop.over,.drop:active{background:var(--rose-l);border-color:var(--rose)}
+.drop{position:relative;display:grid;place-items:center;align-content:center;gap:8px;min-height:148px;border:2px dashed var(--shadow);border-radius:14px;background:var(--rose-tt);cursor:pointer;text-align:center;font-size:14px;font-weight:800;color:var(--ink2);overflow:hidden;transition:border-color .2s,background .2s}
+.drop.over,.drop:active{border-color:var(--rose);background:var(--rose-t)}
 .drop:focus-within{outline:3px solid var(--blue-d);outline-offset:2px}
-.drop .cam{width:52px;height:52px;border-radius:50%;background:#fff;box-shadow:var(--sh-1);display:grid;place-items:center;color:var(--rose-d);transition:transform .4s var(--spring)}
-.drop .cam svg.i{width:24px;height:24px}
+.drop .cam{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;color:var(--ink)}
+.drop .cam svg.i{width:22px;height:22px}
 .drop input{position:absolute;opacity:0;width:1px;height:1px}
 .drop img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:fade .4s}
-.rm{position:absolute;top:10px;right:10px;z-index:2;min-height:40px;padding:0 14px;border-radius:99px;background:rgba(255,255,255,.95);box-shadow:var(--sh-1);font-size:13px;font-weight:900}
+.rm{position:absolute;top:10px;right:10px;z-index:2;height:36px;padding:0 12px;border-radius:10px;font-size:13px;font-weight:900}
 .field{border:0;padding:0;min-width:0}
 .field label,.field legend{display:block;font-weight:900;font-size:13px;color:var(--ink2);margin-bottom:8px;padding:0}
-.inp{display:block;width:100%;min-height:52px;padding:0 16px;border:1.8px solid transparent;border-radius:16px;font:700 16px 'Nunito';color:var(--ink);background:#FFF5F7;transition:border-color .2s,box-shadow .2s,background .2s;-webkit-appearance:none;appearance:none}
-.inp:focus{outline:none;background:#fff;border-color:var(--rose);box-shadow:0 0 0 4px rgba(238,122,153,.16)}
+.inp{display:block;width:100%;height:50px;padding:0 14px;border:2px solid var(--ink);border-radius:12px;font:700 16px 'Nunito';color:var(--ink);background:#fff;transition:box-shadow .15s;-webkit-appearance:none;appearance:none}
+.inp:focus{outline:none;box-shadow:3px 3px 0 var(--rose)}
 .inp::placeholder{color:var(--ink3)}
 .inp[type=time]{display:flex;align-items:center}
 .inp::-webkit-date-and-time-value{text-align:left}
 .meals{display:flex;flex-wrap:wrap;gap:8px}
 .meals label{display:block;margin:0;color:var(--ink)}
 .meals input{position:absolute;opacity:0;pointer-events:none}
-.meals span{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 15px;border:1.8px solid var(--line);border-radius:99px;background:#fff;font-weight:900;font-size:14px;cursor:pointer;-webkit-user-select:none;user-select:none;transition:transform .35s var(--spring),background .2s,border-color .2s,box-shadow .2s}
-.meals input:checked+span{background:var(--bg);border-color:transparent;box-shadow:inset 0 0 0 1.8px rgba(74,53,53,.28);transform:translateY(-2px)}
+.meals span{display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 14px;border:2px solid var(--ink);border-radius:99px;background:#fff;font-weight:900;font-size:14px;cursor:pointer;-webkit-user-select:none;user-select:none;transition:background .15s,box-shadow .15s,transform .15s}
+.meals input:checked+span{background:var(--rose);box-shadow:2px 2px 0 var(--ink);transform:translate(-1px,-1px)}
 .meals input:focus-visible+span{outline:3px solid var(--blue-d);outline-offset:2px}
-.actions{display:flex;gap:10px;align-items:center;justify-content:flex-end;padding-top:4px}
-.btn{min-height:50px;padding:0 22px;border-radius:99px;background:var(--rose-ll);font-weight:900;font-size:15px;transition:transform .3s var(--spring),box-shadow .3s}
-.btn:active{transform:scale(.95)}
-.btn.primary{background:var(--grad-rose);color:#fff;box-shadow:var(--sh-rose)}
-.btn.ghost{margin-right:auto;background:none;color:var(--rose-d);padding-inline:6px}
+.actions{display:flex;gap:10px;align-items:center;justify-content:flex-end;padding-top:2px}
+.btn{height:48px;padding:0 20px;border-radius:14px;font-weight:900;font-size:15px}
+.btn.primary{background:var(--rose)}
+.btn.ghost{margin-right:auto;border:0;box-shadow:none;background:none;color:var(--ink2);text-decoration:underline;padding-inline:4px}
 
 /* calendar */
-.cal-b{padding:4px 18px 20px}
+.cal-b{padding:14px 16px 18px}
 .cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .cal-h h3{font:600 18px 'Fredoka',sans-serif}
 .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.wd{font-size:11px;font-weight:900;text-align:center;color:var(--ink3);padding-bottom:4px}
-.cd{aspect-ratio:1;min-width:0;border-radius:15px;background:transparent center/cover;font:600 14px 'Fredoka',sans-serif;position:relative;display:grid;place-items:center;transition:transform .3s var(--spring)}
-.cd:active:not(:disabled){transform:scale(.9)}
-.cd em{font-style:normal;font-size:19px}
-.cd.has{background-color:var(--rose-ll)}
-.cd.has span{position:absolute;top:3px;left:6px;font-size:10px;color:var(--ink2)}
-.cd.ph{box-shadow:inset 0 0 0 1.5px rgba(74,53,53,.15)}
-.cd.ph span{background:rgba(255,255,255,.92);border-radius:7px;padding:0 4px;color:var(--ink)}
-.cd.today{box-shadow:inset 0 0 0 2px var(--rose-l);color:var(--rose-d)}
-.cd.sel{outline:2.5px solid var(--rose);outline-offset:2px}
+.wd{font-size:11px;font-weight:900;text-align:center;color:var(--ink2);padding-bottom:4px}
+.cd{aspect-ratio:1;min-width:0;border:2px solid transparent;border-radius:12px;background:transparent center/cover;font:600 14px 'Fredoka',sans-serif;position:relative;display:grid;place-items:center;transition:transform .15s}
+.cd:active:not(:disabled){transform:scale(.92)}
+.cd em{font-style:normal;font-size:18px}
+.cd.has{background-color:var(--rose-tt);border-color:var(--rose-t)}
+.cd.has span{position:absolute;top:2px;left:5px;font-size:10px}
+.cd.ph{border-color:var(--ink)}
+.cd.ph span{background:#fff;border-radius:6px;padding:0 4px}
+.cd.today{border:2px dashed var(--rose)}
+.cd.sel{outline:2.5px solid var(--ink);outline-offset:2px}
 .cd:disabled{opacity:.3}
 
 /* toast */
-.toast{position:fixed;left:50%;bottom:calc(98px + var(--safe-b));z-index:50;display:flex;gap:14px;align-items:center;min-height:48px;max-width:calc(100vw - 32px);width:max-content;padding:8px 20px;border-radius:20px;
-  background:rgba(74,53,53,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#fff;font-weight:800;font-size:14px;text-align:center;box-shadow:0 16px 34px -12px rgba(74,40,52,.55);
+.toast{position:fixed;left:50%;bottom:calc(98px + var(--safe-b));z-index:50;display:flex;gap:14px;align-items:center;min-height:46px;max-width:calc(100vw - 32px);width:max-content;padding:8px 18px;border:2px solid var(--ink);border-radius:14px;background:#fff;color:var(--ink);font-weight:800;font-size:14px;text-align:center;box-shadow:3px 3px 0 var(--ink);
   transform:translate(-50%,calc(100% + 140px));visibility:hidden;transition:transform .5s var(--spring),visibility .5s}
 .toast.show{transform:translate(-50%,0);visibility:visible}
-.toast button{min-height:44px;color:#FFC2D3;font-weight:900;text-decoration:underline}
+.toast button{min-height:44px;color:var(--ink);font-weight:900;text-decoration:underline;text-decoration-color:var(--rose);text-decoration-thickness:2px}
 
 /* seasonal skin: october turns on the mascots' halloween hats */
 .s-oct{--hallo:1}
 
-/* hover only on real pointers, so taps on phones don't leave cards stuck "lifted" */
+/* hover only on real pointers, so taps on phones don't leave things stuck "lifted" */
 @media (hover:hover){
-  .icon-btn:hover,.chip-btn:hover{transform:translateY(-2px)}
-  .day:hover:not(:disabled):not(.sel){background:var(--rose-ll);transform:translateY(-2px)}
-  .arrow:hover:not(:disabled){transform:scale(1.08)}
-  .mood:hover:not([aria-pressed=true]){transform:scale(1.12) rotate(-8deg)}
-  .card:hover{transform:perspective(800px) translateY(-6px) scale(1.03) rotateX(var(--rx)) rotateY(var(--ry));box-shadow:0 4px 6px rgba(110,60,70,.08),0 26px 40px -18px rgba(170,85,110,.6)}
+  .press:hover:not(:disabled){transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--ink)}
+  .day:hover:not(:disabled):not(.sel){background:var(--rose-tt)}
+  .mood:hover:not([aria-pressed=true]){transform:scale(1.1) rotate(-6deg)}
+  .card:hover{transform:perspective(800px) translateY(-6px) scale(1.03) rotateX(var(--rx)) rotateY(var(--ry));box-shadow:6px 10px 0 var(--shadow)}
   .card:hover .tile span{transform:scale(1.15) rotate(-8deg)}
-  .fab:hover{transform:translateY(-3px) scale(1.05)}
   .fab:hover svg{transform:rotate(90deg)}
   .fab:hover::after{opacity:1;transform:none}
-  .drop:hover{background:var(--rose-l);border-color:var(--rose)}
-  .drop:hover .cam{transform:scale(1.1) rotate(-8deg)}
-  .btn:hover{transform:translateY(-2px)}
-  .btn.ghost:hover{transform:none;text-decoration:underline}
-  .cd:hover:not(:disabled){transform:scale(1.1);z-index:1}
-  .x:hover{background:var(--rose-l)}
+  .drop:hover{border-color:var(--rose)}
+  .cd:hover:not(:disabled){background-color:var(--rose-tt)}
 }
 
 /* desktop: sticky sidebar + wide board */
 @media (min-width:960px){
-  :root{--pw:124px}
-  .wrap{padding:22px 32px 120px}
-  .layout{grid-template-columns:380px 1fr;gap:36px;align-items:start;margin-top:14px}
-  .side{display:grid;gap:20px;position:sticky;top:20px}
-  .greet h1{font-size:42px}
-  .plate-h{margin-top:4px}
+  :root{--pw:120px}
+  .wrap{padding:20px 32px 110px}
+  .layout{grid-template-columns:370px 1fr;gap:40px;align-items:start;margin-top:10px}
+  .side{display:grid;gap:26px;position:sticky;top:20px}
+  .today h1{font-size:34px}
+  #plate{padding-top:2px}
   .fab{right:40px;bottom:36px;width:66px;height:66px}
   .toast{bottom:36px}
 }
-/* phones: bottom sheets */
+/* phones */
 @media (max-width:600px){
   :root{--gap:13px}
-  .card{padding:7px 7px 0;border-radius:12px;border-width:1.6px}
+  .card{padding:7px 7px 0;border-width:2px;border-radius:8px;box-shadow:2px 3px 0 var(--shadow)}
   .cap{padding:8px 2px 10px;gap:6px}
-  .cap b{font-size:14.5px}
-  .tape{width:54px;height:17px;top:-9px}
-  .tape.c1,.tape.c2{width:42px}
-  .sticker{font-size:23px;right:-8px;bottom:36px}
-  .feeder{width:150px;margin-left:-75px}
-  .peek{width:92px}
-  .paw{left:72px;top:18px;width:20px;height:25px}
+  .cap b{font-size:15px}
+  .meta{font-size:11px}
+  .chip{font-size:11px;padding:1px 7px}
+  .tape{width:60px;height:19px;top:-10px}
+  .tape.c1,.tape.c2{width:46px}
+  .sticker{font-size:24px;right:-8px;bottom:38px}
+  .feeder{width:140px;margin-left:-70px}
+  .peek{width:90px}
+  .paw{left:70px;top:17px;width:19px;height:24px}
   dialog{width:100%;max-width:none;margin:auto 0 0}
-  dialog .win{max-height:92dvh;border-radius:30px 30px 0 0;box-shadow:0 -12px 40px -10px rgba(90,40,55,.3);padding-bottom:var(--safe-b)}
-  dialog .bar{touch-action:none;padding-top:24px}
-  .grab{display:block;position:absolute;top:9px;left:50%;width:42px;height:5px;margin-left:-21px;border-radius:9px;background:var(--ink3);opacity:.6}
-  dialog[open]{animation:sheetIn .5s var(--ease)}
-  dialog.closing{animation:sheetOut .28s cubic-bezier(.4,0,1,1) forwards}
-  .form{padding:6px 18px 20px}
+  dialog .win{max-height:92dvh;border-radius:20px 20px 0 0;border-bottom:0;box-shadow:none;padding-bottom:var(--safe-b)}
+  dialog .bar{touch-action:none}
+  .grab{display:block;position:absolute;top:5px;left:50%;width:38px;height:4px;margin-left:-19px;border-radius:9px;background:var(--ink);opacity:.3}
+  dialog[open]{animation:sheetIn .45s var(--ease)}
+  dialog.closing{animation:sheetOut .26s cubic-bezier(.4,0,1,1) forwards}
+  .form{padding:16px}
   .actions .btn{flex:1}
   .actions .btn.ghost{flex:none}
 }
@@ -426,20 +395,16 @@ dialog .bar .t{flex:1;font:700 21px 'Fredoka',sans-serif;letter-spacing:-.2px}
       <circle cx="82.5" cy="68.5" r="2.4" fill="#fff"/><circle cx="122.5" cy="68.5" r="2.4" fill="#fff"/>
     </g>
     <path style="opacity:calc(1 - var(--open,1))" d="M73 73 q7 6 14 0M113 73 q7 6 14 0" fill="none" stroke="#4F8FDB" stroke-width="3" stroke-linecap="round"/>
-    <ellipse cx="65" cy="87" rx="9.5" ry="5.5" fill="#FFB7C9" style="transform-box:fill-box;transform-origin:center;transform:scale(calc(1 + var(--puff,0) * .45))"/>
-    <ellipse cx="135" cy="87" rx="9.5" ry="5.5" fill="#FFB7C9" style="transform-box:fill-box;transform-origin:center;transform:scale(calc(1 + var(--puff,0) * .45))"/>
-    <path style="opacity:calc(1 - var(--munch,0))" d="M94 84 q3 4 6 0 q3 4 6 0" fill="none" stroke="#7FA6D6" stroke-width="2.6" stroke-linecap="round"/>
-    <ellipse style="opacity:var(--munch,0);transform-box:fill-box;transform-origin:50% 0;transform:scaleY(var(--munch,0))" cx="100" cy="90" rx="8" ry="10" fill="#E8607E" stroke="#7FA6D6" stroke-width="2.4"/>
+    <ellipse cx="65" cy="87" rx="9.5" ry="5.5" fill="#FFB7C9" style="transform-box:fill-box;transform-origin:center;transform:scale(calc(1 + var(--puff,0) * .5))"/>
+    <ellipse cx="135" cy="87" rx="9.5" ry="5.5" fill="#FFB7C9" style="transform-box:fill-box;transform-origin:center;transform:scale(calc(1 + var(--puff,0) * .5))"/>
+    <path d="M94 84 q3 4 6 0 q3 4 6 0" fill="none" stroke="#7FA6D6" stroke-width="2.6" stroke-linecap="round"/>
     <g style="opacity:var(--hallo,0)" stroke="#C8743A" stroke-width="2.6" stroke-linejoin="round">
       <path d="M99 10 q1 -6 7 -8" fill="none" stroke="#5E9E5A" stroke-width="3.5" stroke-linecap="round"/>
       <ellipse cx="100" cy="22" rx="22" ry="14" fill="#FFA94D"/>
       <path d="M93 9.5 Q87 22 93 35 M107 9.5 Q113 22 107 35" fill="none"/>
     </g>
   </symbol>
-  <symbol id="cloud" viewBox="0 0 120 60">
-    <path d="M22 52 C6 52 4 34 18 31 C16 16 36 10 44 22 C50 6 76 6 80 24 C96 18 110 30 102 42 C114 46 108 54 98 52 Z" fill="#fff" stroke="#F6D2D9" stroke-width="2.2" stroke-linejoin="round"/>
-  </symbol>
-  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="4.5"/><path d="M3.5 10.2h17M8.2 3v4M15.8 3v4"/><path d="M11.2 14.6l.8.8 1.8-1.8" /></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="4.5"/><path d="M3.5 10.2h17M8.2 3v4M15.8 3v4"/></symbol>
   <symbol id="i-left" viewBox="0 0 24 24"><path d="M14.5 6l-6 6 6 6"/></symbol>
   <symbol id="i-right" viewBox="0 0 24 24"><path d="M9.5 6l6 6-6 6"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
@@ -447,89 +412,78 @@ dialog .bar .t{flex:1;font:700 21px 'Fredoka',sans-serif;letter-spacing:-.2px}
   <symbol id="i-cam" viewBox="0 0 24 24"><path d="M3.8 8.6a2.6 2.6 0 0 1 2.6-2.6h1.9l1.5-2.1h4.4l1.5 2.1h1.9a2.6 2.6 0 0 1 2.6 2.6v8a2.6 2.6 0 0 1-2.6 2.6H6.4a2.6 2.6 0 0 1-2.6-2.6z"/><circle cx="12" cy="12.6" r="3.6"/></symbol>
 </svg>
 
-<div class="sky" aria-hidden="true">
-  <svg class="cloud" style="--t:7%;--w:130px;--d:95s;--dl:-20s"><use href="#cloud"/></svg>
-  <svg class="cloud" style="--t:38%;--w:90px;--d:120s;--dl:-70s"><use href="#cloud"/></svg>
-  <svg class="cloud" style="--t:66%;--w:150px;--d:140s;--dl:-35s"><use href="#cloud"/></svg>
-  <svg class="cloud" style="--t:88%;--w:110px;--d:110s;--dl:-90s"><use href="#cloud"/></svg>
-  <span class="tw" style="top:14%;left:5%">✦</span>
-  <span class="tw" style="top:47%;right:4%;--dl:-1s;--s:18px">♡</span>
-  <span class="tw" style="top:78%;left:3%;--dl:-2s;--s:12px">✦</span>
-</div>
-
 <div class="loader" id="loader" role="status">
-  <div class="lb">
-    <svg viewBox="0 0 120 100" aria-hidden="true" data-blink><use href="#kitty"/></svg>
-    <b>tummy diary</b>
-    <p id="loadMsg">warming up the kitchen…</p>
-    <div class="prog"><span></span></div>
+  <div class="win">
+    <div class="bar"><span class="t">loading.exe</span><i></i><i></i><i></i></div>
+    <div class="lb">
+      <svg viewBox="0 0 120 100" aria-hidden="true" data-blink><use href="#kitty"/></svg>
+      <p id="loadMsg">warming up the kitchen…</p>
+      <div class="prog"><span></span></div>
+    </div>
   </div>
 </div>
 
 <div class="wrap">
   <header class="top reveal">
-    <div class="logo">
-      <button id="kittyBtn" aria-label="boop hello kitty"><svg viewBox="0 0 120 100" aria-hidden="true" data-blink><use href="#kitty"/></svg></button>
-      <div class="brand">tummy diary<small>a soft little food journal ♡</small></div>
-    </div>
-    <button class="chip-btn" id="todayBtn" hidden>today</button>
-    <button class="icon-btn" id="calBtn" aria-label="open calendar"><svg class="i"><use href="#i-cal"/></svg></button>
+    <button id="kittyBtn" aria-label="boop hello kitty"><svg viewBox="0 0 120 100" aria-hidden="true" data-blink><use href="#kitty"/></svg></button>
+    <span class="brand">tummy diary</span>
+    <button class="icon-btn press" id="calBtn" aria-label="open calendar"><svg class="i"><use href="#i-cal"/></svg></button>
   </header>
 
   <div class="layout">
     <div class="side">
-      <section class="hero reveal" style="--d:.06s">
-        <div class="greet">
-          <h1 id="hello">hello ♡</h1>
-          <p class="sub" id="date"></p>
-        </div>
-        <div class="weekwrap">
-          <button class="pup" id="cinna" aria-label="pet cinnamoroll"><svg viewBox="0 0 200 170" aria-hidden="true" data-blink><use href="#pup"/></svg></button>
-          <div class="panel week">
-            <div class="wk-h">
-              <b id="wkLabel"></b>
+      <div class="todaywrap reveal" style="--d:.06s">
+        <button class="pup" id="cinna" aria-label="pet cinnamoroll"><svg viewBox="0 0 200 170" aria-hidden="true" data-blink><use href="#pup"/></svg></button>
+        <section class="win today">
+          <div class="bar"><span class="t" id="dayFile">today.txt</span><i></i><i></i><i></i></div>
+          <div class="body">
+            <h1 id="hello">hello ♡</h1>
+            <div class="date-row">
+              <p class="sub" id="date"></p>
               <div class="arrows">
-                <button class="arrow" id="prev" aria-label="previous week"><svg class="i"><use href="#i-left"/></svg></button>
-                <button class="arrow" id="next" aria-label="next week"><svg class="i"><use href="#i-right"/></svg></button>
+                <button class="arrow press" id="prev" aria-label="previous week"><svg class="i"><use href="#i-left"/></svg></button>
+                <button class="arrow press" id="next" aria-label="next week"><svg class="i"><use href="#i-right"/></svg></button>
               </div>
             </div>
             <div class="days" id="days"></div>
+            <div class="tummy-row">
+              <div>
+                <p class="tm-l" id="tummyL">tummy happiness</p>
+                <div class="tummy" id="tummy" role="img"></div>
+              </div>
+              <div class="count"><b id="count">0</b><span id="countLbl">nibbles</span></div>
+            </div>
+            <p class="streak" id="streak"></p>
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
-      <section class="panel summary reveal" style="--d:.12s" aria-label="today's tummy">
-        <div class="sum-top">
-          <div class="count"><b id="count">0</b><span id="countLbl">nibbles today</span></div>
-          <div class="tm"><div class="tummy" id="tummy" role="img"></div><span id="tummyL">tummy happiness</span></div>
+      <section class="win moodwin reveal" style="--d:.2s">
+        <div class="bar"><span class="t">mood.exe</span><span class="saved" id="saved">saved ♡</span><i></i><i></i><i></i></div>
+        <div class="body">
+          <p class="lbl">how's your heart today?</p>
+          <div class="moods" id="moods"></div>
+          <textarea id="note" aria-label="daily note" placeholder="dear diary… today i felt"></textarea>
         </div>
-        <div class="chips" id="mealStats"></div>
-        <p class="streak" id="streak"></p>
-      </section>
-
-      <section class="panel mood-p reveal" style="--d:.24s">
-        <div class="p-h"><h3>how's your heart?</h3><span class="saved" id="saved">saved ♡</span></div>
-        <div class="moods" id="moods"></div>
-        <textarea id="note" aria-label="daily note" placeholder="dear diary… today i felt"></textarea>
       </section>
     </div>
 
-    <section id="plate" class="reveal" style="--d:.18s">
-      <div class="plate-h"><h2>my plate <span>✿</span></h2><button class="chip-btn" id="shareBtn" hidden><svg class="i"><use href="#i-share"/></svg>share</button></div>
+    <section id="plate" class="reveal" style="--d:.12s">
+      <div class="plate-h"><h2>my plate</h2><button class="btn-s press" id="shareBtn" hidden><svg class="i"><use href="#i-share"/></svg>share</button></div>
       <div class="board" id="board"></div>
       <div class="empty" id="empty" hidden>
         <div class="nap" aria-hidden="true">
           <svg viewBox="0 0 200 170"><use href="#pup"/></svg>
           <span class="z" style="--dl:0s">z</span><span class="z" style="--dl:1s">z</span><span class="z" style="--dl:2s">z</span>
         </div>
-        <b id="emptyT">your plate is empty…</b>
-        <p id="emptyP">tap the + to log your first nibble ☁</p>
+        <b id="emptyT">nothing here yet</b>
+        <p id="emptyP">tap + to add your first nibble</p>
       </div>
     </section>
   </div>
 </div>
 
-<button class="fab" id="fab" aria-label="add a nibble">
+<button class="fab press" id="fab" aria-label="add a nibble">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
 </button>
 
@@ -546,16 +500,16 @@ dialog .bar .t{flex:1;font:700 21px 'Fredoka',sans-serif;letter-spacing:-.2px}
 
 <dialog id="sheet" aria-labelledby="sheetT">
   <div class="win" tabindex="-1">
-    <div class="bar"><span class="grab"></span><span class="t" id="sheetT">new nibble</span><button class="x" data-close aria-label="close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="bar"><span class="grab"></span><span class="t" id="sheetT">new-nibble.txt</span><button class="x" data-close aria-label="close"><svg class="i"><use href="#i-x"/></svg></button></div>
     <form class="form" id="form">
       <div class="photo">
         <label class="drop" id="drop">
-          <span class="cam" aria-hidden="true"><svg class="i"><use href="#i-cam"/></svg></span>
+          <span class="cam press" aria-hidden="true"><svg class="i"><use href="#i-cam"/></svg></span>
           <span id="dropHint">add a photo · optional</span>
           <input type="file" id="file" accept="image/*">
           <img id="preview" alt="photo preview" hidden>
         </label>
-        <button type="button" class="rm" id="rmPhoto" hidden>remove</button>
+        <button type="button" class="rm press" id="rmPhoto" hidden>remove</button>
       </div>
       <div class="field">
         <label for="fName">what did you eat?</label>
@@ -571,8 +525,8 @@ dialog .bar .t{flex:1;font:700 21px 'Fredoka',sans-serif;letter-spacing:-.2px}
       </div>
       <div class="actions">
         <button type="button" class="btn ghost" id="del" hidden>delete</button>
-        <button type="button" class="btn" data-close>cancel</button>
-        <button class="btn primary">save ♡</button>
+        <button type="button" class="btn press" data-close>cancel</button>
+        <button class="btn primary press">save ♡</button>
       </div>
     </form>
   </div>
@@ -580,12 +534,12 @@ dialog .bar .t{flex:1;font:700 21px 'Fredoka',sans-serif;letter-spacing:-.2px}
 
 <dialog id="cal" aria-label="calendar">
   <div class="win" tabindex="-1">
-    <div class="bar"><span class="grab"></span><span class="t">your days</span><button class="x" data-close aria-label="close"><svg class="i"><use href="#i-x"/></svg></button></div>
+    <div class="bar"><span class="grab"></span><span class="t">calendar.app</span><button class="x" data-close aria-label="close"><svg class="i"><use href="#i-x"/></svg></button></div>
     <div class="cal-b">
       <div class="cal-h">
-        <button class="arrow" id="cPrev" aria-label="previous month"><svg class="i"><use href="#i-left"/></svg></button>
+        <button class="arrow press" id="cPrev" aria-label="previous month"><svg class="i"><use href="#i-left"/></svg></button>
         <h3 id="cTitle"></h3>
-        <button class="arrow" id="cNext" aria-label="next month"><svg class="i"><use href="#i-right"/></svg></button>
+        <button class="arrow press" id="cNext" aria-label="next month"><svg class="i"><use href="#i-right"/></svg></button>
       </div>
       <div class="grid" id="cGrid"></div>
     </div>
@@ -611,18 +565,16 @@ const esc = s => s.replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
 const hash = s => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 7);
 
 const MEALS = {
-  breakfast: { e: '🥞', c: 'var(--butter)' }, lunch: { e: '🍱', c: 'var(--blue)' },
-  dinner: { e: '🍝', c: 'var(--blush)' }, snack: { e: '🍓', c: 'var(--lav)' }, drink: { e: '🧋', c: 'var(--peach)' },
+  breakfast: { e: '🥞', c: 'var(--butter-t)' }, lunch: { e: '🍱', c: 'var(--sky-t)' },
+  dinner: { e: '🍝', c: 'var(--rose-t)' }, snack: { e: '🍓', c: 'var(--rose-t)' }, drink: { e: '🧋', c: 'var(--sky-t)' },
 };
 const MOODS = { happy: '😊', sad: '😭', oops: '😅', love: '😻', meh: '😕' };
 const MOOD_NAMES = { happy: 'happy', sad: 'crying', oops: 'oops', love: 'in love', meh: 'meh' };
 const MOOD_ALIAS = { calm: 'happy', sleepy: 'meh' }; // moods saved before the emoji refresh
 const OCT = new Date().getMonth() === 9;
 const STICKERS = ['🎀', '🌸', '💗', '⭐', '🍓', '☁️', ...(OCT ? ['🎃', '👻'] : [])];
-const CHEERS = ['yum! ♡', 'nom nom ♡', 'so proud of u ✿', 'tasty!!', 'good job eating ☁', 'more pls ♡'];
-const MOOD_LINES = { happy: 'yay, love that for u ♡', sad: 'sending big hugs ♡', oops: 'happens to all of us ✿', love: 'heart eyes!! ♡', meh: 'tomorrow will be cuter ☁' };
-// drawn cloud instead of the ☁ glyph, which fonts render sitting too high
-const CLOUD_ICON = '<svg class="h-ico" viewBox="3 5 111 50" aria-hidden="true"><path d="M22 52 C6 52 4 34 18 31 C16 16 36 10 44 22 C50 6 76 6 80 24 C96 18 110 30 102 42 C114 46 108 54 98 52 Z"/></svg>';
+const CHEERS = ['yum! ♡', 'nom nom', 'so good!!', 'more pls ♡', 'tasty ♡'];
+const MOOD_LINES = { happy: 'love that for u ♡', sad: 'sending big hugs ♡', oops: 'happens to all of us', love: 'heart eyes!!', meh: 'tomorrow will be cuter' };
 const HEART ='M12 20.5s-7-4.3-9.2-8.6C1.2 8.7 3 5 6.6 5c2.2 0 3.7 1.3 5.4 3.2C13.7 6.3 15.2 5 17.4 5 21 5 22.8 8.7 21.2 11.9 19 16.2 12 20.5 12 20.5z';
 let tummyWas = { k: null, n: 0 }, party = false;
 const pick = a => a[Math.random() * a.length | 0];
@@ -685,10 +637,9 @@ function renderHero() {
   const d = dateOf(cur), h = new Date().getHours();
   const hi = h < 5 ? 'sweet dreams' : h < 12 ? 'good morning' : h < 17 ? 'good afternoon' : h < 21 ? 'good evening' : 'sweet dreams';
   const isToday = cur === todayKey();
-  $('#hello').textContent = isToday ? `${hi} ♡` : `a peek at ${d.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()} `;
-  if (!isToday) $('#hello').insertAdjacentHTML('beforeend', CLOUD_ICON);
-  $('#date').textContent = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }).toLowerCase();
-  $('#todayBtn').hidden = cur === todayKey();
+  $('#hello').textContent = isToday ? `${hi} ♡` : d.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  $('#dayFile').textContent = isToday ? 'today.txt' : `${d.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase()}.txt`;
+  $('#date').textContent = d.toLocaleDateString('en-US', isToday ? { weekday: 'long', month: 'long', day: 'numeric' } : { month: 'long', day: 'numeric', year: 'numeric' }).toLowerCase();
   renderWeek();
 }
 
@@ -701,8 +652,6 @@ function renderWeek() {
       <small>${d.toLocaleDateString('en-US', { weekday: 'short' }).toLowerCase()}</small><b>${d.getDate()}</b></button>`;
   }).join('');
   $('#next').disabled = addDays(mon, 7) > t;
-  const md = k => dateOf(k).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toLowerCase(), sun = addDays(mon, 6);
-  $('#wkLabel').textContent = mon <= t && t <= sun ? 'this week' : `${md(mon)} – ${md(sun).replace(/^[a-z]+ /, s => mon.slice(5, 7) === sun.slice(5, 7) ? '' : s)}`;
 }
 
 function renderMood() {
@@ -713,22 +662,18 @@ function renderMood() {
 function renderStats() {
   const n = day.items.length;
   $('#count').textContent = n;
-  $('#countLbl').textContent = n === 1 ? 'nibble today' : 'nibbles today';
-  $('#mealStats').innerHTML = Object.entries(MEALS).map(([m, v]) => {
-    const c = day.items.filter(i => i.meal === m).length;
-    return `<span class="chip" style="--bg:${v.c}" aria-label="${c} ${m}">${v.e} ${c}</span>`;
-  }).join('');
+  $('#countLbl').textContent = n === 1 ? 'nibble' : 'nibbles';
   const got = new Set(day.items.map(i => i.meal)).size, grew = tummyWas.k === cur && got > tummyWas.n;
   party = grew && got === 5;
   $('#tummy').innerHTML = Object.keys(MEALS).map((_, i) =>
     `<svg viewBox="0 0 24 24" class="${i < got ? 'f' : ''} ${grew && i >= tummyWas.n && i < got ? 'pop' : ''}"><path d="${HEART}"/></svg>`).join('');
   $('#tummy').setAttribute('aria-label', `${got} of 5 hearts`);
-  $('#tummyL').textContent = got === 5 ? 'tummy happiness · full! ✿' : `tummy happiness · ${got}/5`;
+  $('#tummyL').textContent = got === 5 ? 'tummy happiness · full!' : `tummy happiness · ${got}/5`;
   tummyWas = { k: cur, n: got };
   let s = 0, k = todayKey();
   if (!logged.has(k)) k = addDays(k, -1); // today isn't over yet, so the streak is still alive
   while (logged.has(k)) { s++; k = addDays(k, -1); }
-  $('#streak').textContent = s ? `✿ ${s}-day streak, so proud of u` : '✿ log today to start a streak';
+  $('#streak').textContent = s ? `${s}-day streak ♡` : 'log today to start a streak';
 }
 
 function card(it, i, cls) {
@@ -741,7 +686,7 @@ function card(it, i, cls) {
     : `<span class="tape t${(h >>> 3) % 4}"></span>`;
   const sticker = (h >>> 7) % 3 === 0 ? `<span class="sticker" style="--sr:${((h >>> 9) % 5 - 2) * 9}deg">${STICKERS[(h >>> 11) % STICKERS.length]}</span>` : '';
   return `<button class="card ${cls}" style="--i:${i};--r:${((h >>> 13) % 5 - 2) * .9}deg;--tr:${((h >>> 15) % 7 - 3) * 2.5}deg" data-id="${it.id}" aria-label="${esc(it.name)}, ${it.meal}, ${fmtTime(it.time)}. tap to edit">
-    ${tape}<span class="pic">${pic}</span><span class="cap"><b>${esc(it.name)}</b><span class="meta"><span class="chip" style="--bg:${m.c}">${m.e} ${it.meal}</span><time>${fmtTime(it.time)}</time></span></span>${sticker}</button>`;
+    ${tape}<span class="pic">${pic}</span><span class="cap"><b>${esc(it.name)}</b><span class="meta"><span class="chip">${m.e} ${it.meal}</span><time>${fmtTime(it.time)}</time></span></span>${sticker}</button>`;
 }
 
 function renderBoard(anim, freshId, dir = 0) {
@@ -751,8 +696,8 @@ function renderBoard(anim, freshId, dir = 0) {
   $('#board').innerHTML = items.length ? deal(items, cols).map(col => `<div class="col">${col.map(it =>
     card(it, idx.get(it), anim ? 'in' : it.id === freshId ? 'new' : '')).join('')}</div>`).join('') : '';
   $('#empty').hidden = items.length > 0;
-  $('#emptyT').textContent = isToday ? 'your plate is empty…' : 'no nibbles this day';
-  $('#emptyP').textContent = isToday ? 'tap the + to log your first nibble ☁' : 'tap + to add something ☁';
+  $('#emptyT').textContent = isToday ? 'nothing here yet' : 'no nibbles this day';
+  $('#emptyP').textContent = isToday ? 'tap + to add your first nibble' : 'tap + to add one';
   $('#fab').classList.toggle('nudge', !items.length && isToday);
   $('#shareBtn').hidden = !items.length;
   if (dir && !calm) $('#plate').animate([{ opacity: 0, transform: `translateX(${dir * 30}px)` }, { opacity: 1, transform: 'none' }], { duration: 450, easing: 'cubic-bezier(.2,.8,.2,1)' });
@@ -859,7 +804,7 @@ function openSheet(item) {
   $('#fName').value = item ? item.name : '';
   form.elements.meal.value = item ? item.meal : defaultMeal(new Date().getHours());
   $('#fTime').value = item ? item.time : nowTime();
-  $('#sheetT').textContent = item ? 'edit nibble' : 'new nibble ♡';
+  $('#sheetT').textContent = item ? 'edit-nibble.txt' : 'new-nibble.txt';
   $('#del').hidden = !item;
   $('#file').value = '';
   showPhoto();
@@ -996,7 +941,6 @@ $('#cGrid').onclick = e => { const b = e.target.closest('.cd'); if (b) dismiss($
 $('#days').onclick = e => { const b = e.target.closest('.day'); if (b) go(b.dataset.k); };
 $('#prev').onclick = () => go(addDays(cur, -7), -1);
 $('#next').onclick = () => { const k = addDays(cur, 7), t = todayKey(); go(k > t ? t : k, 1); };
-$('#todayBtn').onclick = () => go(todayKey(), 1);
 $('#fab').onclick = () => openSheet();
 $('#board').onclick = e => { const c = e.target.closest('.card'); if (c) openSheet(day.items.find(i => i.id === c.dataset.id)); };
 addEventListener('resize', () => { if (colCount() !== cols) renderBoard(false); });
@@ -1045,15 +989,12 @@ async function feed(it) {
   const host = !$('#empty').hidden && onScreen(nap) ? nap : onScreen(peeker) ? peeker : $('#feeder');
   try {
     if (calm) return cheer();
-    host.classList.remove('open', 'chew', 'talk');
+    host.classList.remove('chew', 'talk');
     host.classList.add('on');
-    await sleep(host === nap ? 250 : 480);
-    host.classList.add('open');
+    await sleep(host === nap ? 300 : 560);
     buzz(6);
-    await sleep(120);
-    const r = host.querySelector('svg').getBoundingClientRect(), mouth = [r.left + r.width / 2, r.top + r.height * 90 / 170];
+    const r = host.querySelector('svg').getBoundingClientRect(), mouth = [r.left + r.width / 2, r.top + r.height * 86 / 170];
     await fly(it, center($('#fab')), mouth);
-    host.classList.remove('open');
     host.classList.add('chew', 'talk');
     buzz([14, 60, 14, 60, 14]);
     const got = new Set(day.items.map(i => i.meal)).size, line = got === 5 ? 'tummy full!! ♡' : pick(CHEERS);
@@ -1065,7 +1006,7 @@ async function feed(it) {
   }
   if (party) celebrate();
   await sleep(1800);
-  if (run === feedRun) host.classList.remove('on', 'open', 'chew', 'talk');
+  if (run === feedRun) host.classList.remove('on', 'chew', 'talk');
 }
 
 /* holo tilt: mouse on desktop, gyroscope on phones */
@@ -1118,9 +1059,6 @@ function hop(el, deg) {
 }
 $('#cinna').onclick = e => hop(e.currentTarget, 6);
 $('#kittyBtn').onclick = e => hop(e.currentTarget, -8);
-document.addEventListener('click', e => {
-  if (e.detail && !e.target.closest('input,textarea,dialog,.pup,#kittyBtn')) burst(e.clientX, e.clientY, 4, 26, '✦♡', 12);
-});
 
 // blinks: a 140ms class toggle at random gaps, so nothing runs on the main thread between blinks
 if (!calm) document.querySelectorAll('[data-blink]').forEach(el => {
@@ -1238,7 +1176,6 @@ $('#shareBtn').onclick = async () => {
 if (OCT) {
   document.body.classList.add('s-oct');
   $('#loadMsg').textContent = 'stirring the cauldron…';
-  $('.sky').insertAdjacentHTML('beforeend', '<span class="tw" style="top:22%;left:12%;--s:22px;opacity:.6">🦇</span><span class="tw" style="top:58%;right:9%;--dl:-1.4s;--s:18px;opacity:.6">🦇</span>');
 }
 
 let toastTimer;
